@@ -1,6 +1,9 @@
 package schema
 
 import (
+	"context"
+	"fmt"
+
 	"entgo.io/contrib/entgql"
 	"entgo.io/ent"
 	"entgo.io/ent/schema"
@@ -8,6 +11,9 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 
+	gen "go.infratographer.com/load-balancer-api/internal/ent/generated"
+	"go.infratographer.com/load-balancer-api/internal/ent/generated/hook"
+	"go.infratographer.com/load-balancer-api/internal/pubsub"
 	"go.infratographer.com/x/entx"
 	"go.infratographer.com/x/gidx"
 )
@@ -127,6 +133,36 @@ func (LoadBalancer) Annotations() []schema.Annotation {
 		entgql.Mutations(
 			entgql.MutationCreate().Description("Input information to create a load balancer."),
 			entgql.MutationUpdate().Description("Input information to update a load balancer."),
+		),
+	}
+}
+
+// Hooks might do some things
+func (LoadBalancer) Hooks() []ent.Hook {
+	return []ent.Hook{
+		hook.On(
+			func(next ent.Mutator) ent.Mutator {
+				return hook.LoadBalancerFunc(func(ctx context.Context, m *gen.LoadBalancerMutation) (ent.Value, error) {
+					val, err := next.Mutate(ctx, m)
+					if err != nil {
+						return nil, err
+					}
+
+					fieldMap := make(map[string]ent.Value)
+					for _, field := range m.Fields() {
+						v, _ := m.Field(field)
+						fieldMap[field] = v
+					}
+
+					msg, err := pubsub.NewMessage(fieldMap["tenant_id"].(gidx.PrefixedID).String(), pubsub.WithEventType("create"), pubsub.WithSource("load-balancer-api"))
+
+					fmt.Println(msg)
+
+					return val, err
+				})
+			},
+			// Limit the hook only for these operations.
+			ent.OpCreate|ent.OpUpdate|ent.OpUpdateOne,
 		),
 	}
 }
