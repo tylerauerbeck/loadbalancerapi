@@ -25,6 +25,7 @@
 
 {{ $genPackage := base $.Config.Package }}
 
+
 {{- range $node := $.Nodes }}
 		{{- if $nodeAnnotation := $node.Annotations.INFRA9_PUBSUBHOOK }}
 		func {{ $node.Name }}Hooks() []ent.Hook {
@@ -47,6 +48,22 @@
 						}
 
 						changeset := []pubsubx.FieldChange{}
+
+						val, _ := m.Client().{{ $node.Name }}.Get(ctx, objID)
+						fmt.Println(val)
+
+						{{- range $k := $node.Edges }}
+								// edgeType := {{ $k.Type.Name }}
+								// fmt.Println( m.{{ $k.Type.Name }}IDs())
+							{{- range $z := $k.Type.Fields }}
+									// _ = {{ $z.Name }}
+								{{- $annotation := $z.Annotations.INFRA9_PUBSUBHOOK }}
+								{{- if or $annotation.IsAdditionalSubjectField (contains $nodeAnnotation.QueueName $z.Name) }}
+									subj_{{ $z.Name}} := {{ $z.Name }}
+								{{- end }}
+							{{- end }}
+					
+						{{- end }}
 
 						{{- range $f := $node.Fields }}
 							{{- if $f.Sensitive }}

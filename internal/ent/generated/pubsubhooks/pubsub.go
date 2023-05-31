@@ -50,7 +50,47 @@ func LoadBalancerHooks() []ent.Hook {
 						return nil, fmt.Errorf("object doesn't have an id %s", objID)
 					}
 
+					fmt.Printf("I AM THIS TYPE: %s\n", m.Type())
+
 					changeset := []pubsubx.FieldChange{}
+
+					val, _ := m.Client().LoadBalancer.Get(ctx, objID)
+					fmt.Println(val)
+
+					portids := val.QueryPorts().IDsX(ctx)
+					fmt.Println(portids)
+
+					val.
+
+					// edgeType := LoadBalancerAnnotation
+					// fmt.Println( m.LoadBalancerAnnotationIDs())
+					// _ = namespace
+					// _ = data
+					// _ = created_at
+					// _ = updated_at
+					// _ = load_balancer_id
+					// edgeType := LoadBalancerStatus
+					// fmt.Println( m.LoadBalancerStatusIDs())
+					// _ = namespace
+					// _ = data
+					// _ = created_at
+					// _ = updated_at
+					// _ = load_balancer_id
+					// _ = source
+					// edgeType := Port
+					// fmt.Println( m.PortIDs())
+					// _ = created_at
+					// _ = updated_at
+					// _ = number
+					// _ = name
+					// _ = load_balancer_id
+					// subj_load_balancer_id := load_balancer_id
+					// edgeType := Provider
+					// fmt.Println( m.ProviderIDs())
+					// _ = created_at
+					// _ = updated_at
+					// _ = name
+					// _ = tenant_id
 					cv_created_at := ""
 					created_at, ok := m.CreatedAt()
 
@@ -309,6 +349,552 @@ func LoadBalancerHooks() []ent.Hook {
 		),
 	}
 }
+func OriginHooks() []ent.Hook {
+	return []ent.Hook{
+		hook.On(
+			func(next ent.Mutator) ent.Mutator {
+				return hook.OriginFunc(func(ctx context.Context, m *generated.OriginMutation) (ent.Value, error) {
+					// complete the mutation before we process the event
+					retValue, err := next.Mutate(ctx, m)
+					if err != nil {
+						return retValue, err
+					}
+
+					queueName := "load-balancer-origin.%location_id%"
+					additionalSubjects := []gidx.PrefixedID{}
+
+					objID, ok := m.ID()
+					if !ok {
+						return nil, fmt.Errorf("object doesn't have an id %s", objID)
+					}
+
+					changeset := []pubsubx.FieldChange{}
+
+					val, _ := m.Client().Origin.Get(ctx, objID)
+					fmt.Println(val)
+					// edgeType := Pool
+					// fmt.Println( m.PoolIDs())
+					// _ = created_at
+					// _ = updated_at
+					// _ = name
+					// _ = protocol
+					// _ = tenant_id
+					// subj_tenant_id := tenant_id
+
+					ids := val.QueryPool().IDsX(ctx)
+					fmt.Println(ids)
+
+					cv_created_at := ""
+					created_at, ok := m.CreatedAt()
+
+					if ok {
+						cv_created_at = created_at.Format(time.RFC3339)
+						pv_created_at := ""
+						if !m.Op().Is(ent.OpCreate) {
+							ov, err := m.OldCreatedAt(ctx)
+							if err != nil {
+								pv_created_at = "<unknown>"
+							} else {
+								pv_created_at = ov.Format(time.RFC3339)
+							}
+						}
+
+						changeset = append(changeset, pubsubx.FieldChange{
+							Field:         "created_at",
+							PreviousValue: pv_created_at,
+							CurrentValue:  cv_created_at,
+						})
+					}
+
+					cv_updated_at := ""
+					updated_at, ok := m.UpdatedAt()
+
+					if ok {
+						cv_updated_at = updated_at.Format(time.RFC3339)
+						pv_updated_at := ""
+						if !m.Op().Is(ent.OpCreate) {
+							ov, err := m.OldUpdatedAt(ctx)
+							if err != nil {
+								pv_updated_at = "<unknown>"
+							} else {
+								pv_updated_at = ov.Format(time.RFC3339)
+							}
+						}
+
+						changeset = append(changeset, pubsubx.FieldChange{
+							Field:         "updated_at",
+							PreviousValue: pv_updated_at,
+							CurrentValue:  cv_updated_at,
+						})
+					}
+
+					cv_name := ""
+					name, ok := m.Name()
+
+					if ok {
+						cv_name = fmt.Sprintf("%s", fmt.Sprint(name))
+						pv_name := ""
+						if !m.Op().Is(ent.OpCreate) {
+							ov, err := m.OldName(ctx)
+							if err != nil {
+								pv_name = "<unknown>"
+							} else {
+								pv_name = fmt.Sprintf("%s", fmt.Sprint(ov))
+							}
+						}
+
+						changeset = append(changeset, pubsubx.FieldChange{
+							Field:         "name",
+							PreviousValue: pv_name,
+							CurrentValue:  cv_name,
+						})
+					}
+
+					cv_target := ""
+					target, ok := m.Target()
+
+					if ok {
+						cv_target = fmt.Sprintf("%s", fmt.Sprint(target))
+						pv_target := ""
+						if !m.Op().Is(ent.OpCreate) {
+							ov, err := m.OldTarget(ctx)
+							if err != nil {
+								pv_target = "<unknown>"
+							} else {
+								pv_target = fmt.Sprintf("%s", fmt.Sprint(ov))
+							}
+						}
+
+						changeset = append(changeset, pubsubx.FieldChange{
+							Field:         "target",
+							PreviousValue: pv_target,
+							CurrentValue:  cv_target,
+						})
+					}
+
+					cv_port_number := ""
+					port_number, ok := m.PortNumber()
+
+					if ok {
+						cv_port_number = fmt.Sprintf("%s", fmt.Sprint(port_number))
+						pv_port_number := ""
+						if !m.Op().Is(ent.OpCreate) {
+							ov, err := m.OldPortNumber(ctx)
+							if err != nil {
+								pv_port_number = "<unknown>"
+							} else {
+								pv_port_number = fmt.Sprintf("%s", fmt.Sprint(ov))
+							}
+						}
+
+						changeset = append(changeset, pubsubx.FieldChange{
+							Field:         "port_number",
+							PreviousValue: pv_port_number,
+							CurrentValue:  cv_port_number,
+						})
+					}
+
+					cv_active := ""
+					active, ok := m.Active()
+
+					if ok {
+						cv_active = fmt.Sprintf("%s", fmt.Sprint(active))
+						pv_active := ""
+						if !m.Op().Is(ent.OpCreate) {
+							ov, err := m.OldActive(ctx)
+							if err != nil {
+								pv_active = "<unknown>"
+							} else {
+								pv_active = fmt.Sprintf("%s", fmt.Sprint(ov))
+							}
+						}
+
+						changeset = append(changeset, pubsubx.FieldChange{
+							Field:         "active",
+							PreviousValue: pv_active,
+							CurrentValue:  cv_active,
+						})
+					}
+
+					cv_pool_id := ""
+					pool_id, ok := m.PoolID()
+					if !ok && !m.Op().Is(ent.OpCreate) {
+						// since we are doing an update or delete and these fields didn't change, load the "old" value
+						pool_id, err = m.OldPoolID(ctx)
+						if err != nil {
+							return nil, err
+						}
+					}
+					additionalSubjects = append(additionalSubjects, pool_id)
+
+					if ok {
+						cv_pool_id = fmt.Sprintf("%s", fmt.Sprint(pool_id))
+						pv_pool_id := ""
+						if !m.Op().Is(ent.OpCreate) {
+							ov, err := m.OldPoolID(ctx)
+							if err != nil {
+								pv_pool_id = "<unknown>"
+							} else {
+								pv_pool_id = fmt.Sprintf("%s", fmt.Sprint(ov))
+							}
+						}
+
+						changeset = append(changeset, pubsubx.FieldChange{
+							Field:         "pool_id",
+							PreviousValue: pv_pool_id,
+							CurrentValue:  cv_pool_id,
+						})
+					}
+
+					msg := pubsubx.ChangeMessage{
+						EventType:            eventType(m.Op()),
+						SubjectID:            objID,
+						AdditionalSubjectIDs: additionalSubjects,
+						Timestamp:            time.Now().UTC(),
+						FieldChanges:         changeset,
+					}
+
+					fmt.Println(queueName)
+
+					lb_lookup := getLocation(ctx, objID, additionalSubjects)
+					if lb_lookup != "" {
+						lb, err := m.Client().LoadBalancer.Get(ctx, lb_lookup)
+						if err != nil {
+							return nil, fmt.Errorf("unable to lookup location %s", lb_lookup)
+						}
+
+						if !slices.Contains(additionalSubjects, lb.LocationID) {
+							additionalSubjects = append(additionalSubjects, lb.LocationID)
+							msg.AdditionalSubjectIDs = additionalSubjects
+						}
+					}
+
+					pubSubj := m.PubsubClient.NewSubject("changes", eventType(m.Op()), eventSubject(objID))
+
+					if err := m.PubsubClient.PublishChange(ctx, pubSubj, msg); err != nil {
+						return nil, fmt.Errorf("failed to publish change: %w", err)
+					}
+
+					return retValue, nil
+				})
+			},
+			ent.OpCreate|ent.OpUpdate|ent.OpUpdateOne,
+		),
+
+		// Delete Hook
+		hook.On(
+			func(next ent.Mutator) ent.Mutator {
+				return hook.OriginFunc(func(ctx context.Context, m *generated.OriginMutation) (ent.Value, error) {
+					queueName := "load-balancer-origin.%location_id%"
+					additionalSubjects := []gidx.PrefixedID{}
+
+					objID, ok := m.ID()
+					if !ok {
+						return nil, fmt.Errorf("object doesn't have an id %s", objID)
+					}
+
+					dbObj, err := m.Client().Origin.Get(ctx, objID)
+					if err != nil {
+						return nil, fmt.Errorf("failed to load object to get values for pubsub, err %w", err)
+					}
+
+					additionalSubjects = append(additionalSubjects, dbObj.PoolID)
+
+					lb_lookup := getLocation(ctx, objID, additionalSubjects)
+					if lb_lookup != "" {
+						lb, err := m.Client().LoadBalancer.Get(ctx, lb_lookup)
+						if err != nil {
+							return nil, fmt.Errorf("unable to lookup location %s", lb_lookup)
+						}
+
+						if !slices.Contains(additionalSubjects, lb.LocationID) {
+							additionalSubjects = append(additionalSubjects, lb.LocationID)
+							// msg.AdditionalSubjectIDs = additionalSubjects
+						}
+					}
+
+					// we have all the info we need, now complete the mutation before we process the event
+					retValue, err := next.Mutate(ctx, m)
+					if err != nil {
+						return retValue, err
+					}
+
+					msg := pubsubx.ChangeMessage{
+						EventType:            eventType(m.Op()),
+						SubjectID:            objID,
+						AdditionalSubjectIDs: additionalSubjects,
+						Timestamp:            time.Now().UTC(),
+					}
+
+					fmt.Println(queueName)
+
+					pubSubj := m.PubsubClient.NewSubject("changes", eventType(m.Op()), eventSubject(objID))
+
+					if err := m.PubsubClient.PublishChange(ctx, pubSubj, msg); err != nil {
+						return nil, fmt.Errorf("failed to publish change: %w", err)
+					}
+
+					return retValue, nil
+				})
+			},
+			ent.OpDelete|ent.OpDeleteOne,
+		),
+	}
+}
+func PoolHooks() []ent.Hook {
+	return []ent.Hook{
+		hook.On(
+			func(next ent.Mutator) ent.Mutator {
+				return hook.PoolFunc(func(ctx context.Context, m *generated.PoolMutation) (ent.Value, error) {
+					// complete the mutation before we process the event
+					retValue, err := next.Mutate(ctx, m)
+					if err != nil {
+						return retValue, err
+					}
+
+					queueName := "load-balancer-pool.%location_id%"
+					additionalSubjects := []gidx.PrefixedID{}
+
+					objID, ok := m.ID()
+					if !ok {
+						return nil, fmt.Errorf("object doesn't have an id %s", objID)
+					}
+
+					changeset := []pubsubx.FieldChange{}
+
+					val, _ := m.Client().Pool.Get(ctx, objID)
+					fmt.Println(val)
+					// edgeType := Port
+					// fmt.Println( m.PortIDs())
+					// _ = created_at
+					// _ = updated_at
+					// _ = number
+					// _ = name
+					// _ = load_balancer_id
+					// subj_load_balancer_id := load_balancer_id
+					// edgeType := Origin
+					// fmt.Println( m.OriginIDs())
+					// _ = created_at
+					// _ = updated_at
+					// _ = name
+					// _ = target
+					// _ = port_number
+					// _ = active
+					// _ = pool_id
+					// subj_pool_id := pool_id
+					cv_created_at := ""
+					created_at, ok := m.CreatedAt()
+
+					if ok {
+						cv_created_at = created_at.Format(time.RFC3339)
+						pv_created_at := ""
+						if !m.Op().Is(ent.OpCreate) {
+							ov, err := m.OldCreatedAt(ctx)
+							if err != nil {
+								pv_created_at = "<unknown>"
+							} else {
+								pv_created_at = ov.Format(time.RFC3339)
+							}
+						}
+
+						changeset = append(changeset, pubsubx.FieldChange{
+							Field:         "created_at",
+							PreviousValue: pv_created_at,
+							CurrentValue:  cv_created_at,
+						})
+					}
+
+					cv_updated_at := ""
+					updated_at, ok := m.UpdatedAt()
+
+					if ok {
+						cv_updated_at = updated_at.Format(time.RFC3339)
+						pv_updated_at := ""
+						if !m.Op().Is(ent.OpCreate) {
+							ov, err := m.OldUpdatedAt(ctx)
+							if err != nil {
+								pv_updated_at = "<unknown>"
+							} else {
+								pv_updated_at = ov.Format(time.RFC3339)
+							}
+						}
+
+						changeset = append(changeset, pubsubx.FieldChange{
+							Field:         "updated_at",
+							PreviousValue: pv_updated_at,
+							CurrentValue:  cv_updated_at,
+						})
+					}
+
+					cv_name := ""
+					name, ok := m.Name()
+
+					if ok {
+						cv_name = fmt.Sprintf("%s", fmt.Sprint(name))
+						pv_name := ""
+						if !m.Op().Is(ent.OpCreate) {
+							ov, err := m.OldName(ctx)
+							if err != nil {
+								pv_name = "<unknown>"
+							} else {
+								pv_name = fmt.Sprintf("%s", fmt.Sprint(ov))
+							}
+						}
+
+						changeset = append(changeset, pubsubx.FieldChange{
+							Field:         "name",
+							PreviousValue: pv_name,
+							CurrentValue:  cv_name,
+						})
+					}
+
+					cv_protocol := ""
+					protocol, ok := m.Protocol()
+
+					if ok {
+						cv_protocol = fmt.Sprintf("%s", fmt.Sprint(protocol))
+						pv_protocol := ""
+						if !m.Op().Is(ent.OpCreate) {
+							ov, err := m.OldProtocol(ctx)
+							if err != nil {
+								pv_protocol = "<unknown>"
+							} else {
+								pv_protocol = fmt.Sprintf("%s", fmt.Sprint(ov))
+							}
+						}
+
+						changeset = append(changeset, pubsubx.FieldChange{
+							Field:         "protocol",
+							PreviousValue: pv_protocol,
+							CurrentValue:  cv_protocol,
+						})
+					}
+
+					cv_tenant_id := ""
+					tenant_id, ok := m.TenantID()
+					if !ok && !m.Op().Is(ent.OpCreate) {
+						// since we are doing an update or delete and these fields didn't change, load the "old" value
+						tenant_id, err = m.OldTenantID(ctx)
+						if err != nil {
+							return nil, err
+						}
+					}
+					additionalSubjects = append(additionalSubjects, tenant_id)
+
+					if ok {
+						cv_tenant_id = fmt.Sprintf("%s", fmt.Sprint(tenant_id))
+						pv_tenant_id := ""
+						if !m.Op().Is(ent.OpCreate) {
+							ov, err := m.OldTenantID(ctx)
+							if err != nil {
+								pv_tenant_id = "<unknown>"
+							} else {
+								pv_tenant_id = fmt.Sprintf("%s", fmt.Sprint(ov))
+							}
+						}
+
+						changeset = append(changeset, pubsubx.FieldChange{
+							Field:         "tenant_id",
+							PreviousValue: pv_tenant_id,
+							CurrentValue:  cv_tenant_id,
+						})
+					}
+
+					msg := pubsubx.ChangeMessage{
+						EventType:            eventType(m.Op()),
+						SubjectID:            objID,
+						AdditionalSubjectIDs: additionalSubjects,
+						Timestamp:            time.Now().UTC(),
+						FieldChanges:         changeset,
+					}
+
+					fmt.Println(queueName)
+
+					lb_lookup := getLocation(ctx, objID, additionalSubjects)
+					if lb_lookup != "" {
+						lb, err := m.Client().LoadBalancer.Get(ctx, lb_lookup)
+						if err != nil {
+							return nil, fmt.Errorf("unable to lookup location %s", lb_lookup)
+						}
+
+						if !slices.Contains(additionalSubjects, lb.LocationID) {
+							additionalSubjects = append(additionalSubjects, lb.LocationID)
+							msg.AdditionalSubjectIDs = additionalSubjects
+						}
+					}
+
+					pubSubj := m.PubsubClient.NewSubject("changes", eventType(m.Op()), eventSubject(objID))
+
+					if err := m.PubsubClient.PublishChange(ctx, pubSubj, msg); err != nil {
+						return nil, fmt.Errorf("failed to publish change: %w", err)
+					}
+
+					return retValue, nil
+				})
+			},
+			ent.OpCreate|ent.OpUpdate|ent.OpUpdateOne,
+		),
+
+		// Delete Hook
+		hook.On(
+			func(next ent.Mutator) ent.Mutator {
+				return hook.PoolFunc(func(ctx context.Context, m *generated.PoolMutation) (ent.Value, error) {
+					queueName := "load-balancer-pool.%location_id%"
+					additionalSubjects := []gidx.PrefixedID{}
+
+					objID, ok := m.ID()
+					if !ok {
+						return nil, fmt.Errorf("object doesn't have an id %s", objID)
+					}
+
+					dbObj, err := m.Client().Pool.Get(ctx, objID)
+					if err != nil {
+						return nil, fmt.Errorf("failed to load object to get values for pubsub, err %w", err)
+					}
+
+					additionalSubjects = append(additionalSubjects, dbObj.TenantID)
+
+					lb_lookup := getLocation(ctx, objID, additionalSubjects)
+					if lb_lookup != "" {
+						lb, err := m.Client().LoadBalancer.Get(ctx, lb_lookup)
+						if err != nil {
+							return nil, fmt.Errorf("unable to lookup location %s", lb_lookup)
+						}
+
+						if !slices.Contains(additionalSubjects, lb.LocationID) {
+							additionalSubjects = append(additionalSubjects, lb.LocationID)
+							// msg.AdditionalSubjectIDs = additionalSubjects
+						}
+					}
+
+					// we have all the info we need, now complete the mutation before we process the event
+					retValue, err := next.Mutate(ctx, m)
+					if err != nil {
+						return retValue, err
+					}
+
+					msg := pubsubx.ChangeMessage{
+						EventType:            eventType(m.Op()),
+						SubjectID:            objID,
+						AdditionalSubjectIDs: additionalSubjects,
+						Timestamp:            time.Now().UTC(),
+					}
+
+					fmt.Println(queueName)
+
+					pubSubj := m.PubsubClient.NewSubject("changes", eventType(m.Op()), eventSubject(objID))
+
+					if err := m.PubsubClient.PublishChange(ctx, pubSubj, msg); err != nil {
+						return nil, fmt.Errorf("failed to publish change: %w", err)
+					}
+
+					return retValue, nil
+				})
+			},
+			ent.OpDelete|ent.OpDeleteOne,
+		),
+	}
+}
 func PortHooks() []ent.Hook {
 	return []ent.Hook{
 		hook.On(
@@ -329,6 +915,28 @@ func PortHooks() []ent.Hook {
 					}
 
 					changeset := []pubsubx.FieldChange{}
+
+					val, _ := m.Client().Port.Get(ctx, objID)
+					fmt.Println(val)
+					// edgeType := Pool
+					// fmt.Println( m.PoolIDs())
+					// _ = created_at
+					// _ = updated_at
+					// _ = name
+					// _ = protocol
+					// _ = tenant_id
+					// subj_tenant_id := tenant_id
+					// // edgeType := LoadBalancer
+					// // fmt.Println( m.LoadBalancerIDs())
+					// // _ = created_at
+					// // _ = updated_at
+					// // _ = name
+					// // _ = tenant_id
+					// subj_tenant_id := tenant_id
+					// // _ = location_id
+					// subj_location_id := location_id
+					// // _ = provider_id
+					// subj_provider_id := provider_id
 					cv_created_at := ""
 					created_at, ok := m.CreatedAt()
 
@@ -545,6 +1153,10 @@ func PortHooks() []ent.Hook {
 
 func PubsubHooks(c *generated.Client) {
 	c.LoadBalancer.Use(LoadBalancerHooks()...)
+
+	c.Origin.Use(OriginHooks()...)
+
+	c.Pool.Use(PoolHooks()...)
 
 	c.Port.Use(PortHooks()...)
 

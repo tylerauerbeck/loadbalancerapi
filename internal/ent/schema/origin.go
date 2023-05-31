@@ -8,6 +8,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 
+	"go.infratographer.com/load-balancer-api/x/pubsubinfo"
 	"go.infratographer.com/x/entx"
 	"go.infratographer.com/x/gidx"
 )
@@ -59,6 +60,7 @@ func (Origin) Fields() []ent.Field {
 			Immutable().
 			NotEmpty().
 			Annotations(
+				pubsubinfo.AdditionalSubject(),
 				entgql.Type("ID"),
 				entgql.Skip(entgql.SkipWhereInput, entgql.SkipMutationUpdateInput),
 			),
@@ -89,6 +91,7 @@ func (Origin) Annotations() []schema.Annotation {
 	return []schema.Annotation{
 		entx.GraphKeyDirective("id"),
 		entgql.Type("LoadBalancerOrigin"),
+		pubsubinfo.Annotation{QueueName: "load-balancer-origin.%location_id%"},
 		entgql.RelayConnection(),
 		entgql.Mutations(entgql.MutationCreate(), entgql.MutationUpdate()),
 	}
