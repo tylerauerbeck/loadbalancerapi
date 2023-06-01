@@ -46,6 +46,25 @@
 							return nil, fmt.Errorf("object doesn't have an id %s", objID)
 						}
 
+						{{- range $e := $node.Edges }}
+							{{- range $ef := $e.Type.Fields }}
+								{{- $annotation := $ef.Annotations.INFRA9_PUBSUBHOOK }}
+								{{- if or $annotation.IsAdditionalSubjectField (contains $nodeAnnotation.QueueName $ef.Name) }}
+									// addSubj{{ $e.Type.Name }}{{ $ef.Name | camel | title }}, err := m.Client().{{ $e.Type.Name }}.Get(ctx, objID)
+									addSubj{{ $e.Type.Name }}{{ $ef.Name | camel | title }}, err := m.Client().{{ $e.Type.Name }}.Query().Where({{ $e.Type.Name | lower }}.Has{{ $node.Name }}With({{ $node.Name | lower }}.IDEQ(objID))).Only(ctx)
+									if err == nil {
+										if !slices.Contains(additionalSubjects, addSubj{{ $e.Type.Name }}{{ $ef.Name | camel | title }}.ID) && objID != addSubj{{ $e.Type.Name }}{{ $ef.Name | camel | title }}.ID  {
+											additionalSubjects = append(additionalSubjects, addSubj{{ $e.Type.Name }}{{ $ef.Name | camel | title }}.ID)
+										}
+
+										if !slices.Contains(additionalSubjects, addSubj{{ $e.Type.Name }}{{ $ef.Name | camel | title }}.{{ $ef.Name | camel | title }}) {
+											additionalSubjects = append(additionalSubjects, addSubj{{ $e.Type.Name }}{{ $ef.Name | camel | title }}.{{ $ef.Name | camel | title }})
+										}
+									}
+								{{- end }}
+							{{- end }}
+						{{- end }}
+
 						changeset := []pubsubx.FieldChange{}
 
 						{{- range $f := $node.Fields }}

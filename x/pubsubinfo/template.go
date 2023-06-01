@@ -15,6 +15,7 @@ var (
 	// TemplateFuncs contains the extra template functions used by entx.
 	TemplateFuncs = template.FuncMap{
 		"contains": strings.Contains,
+		"title":    strings.Title,
 	}
 
 	// MixinTemplates includes all templates for extending ent to support entx mixins.

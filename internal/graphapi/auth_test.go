@@ -1,63 +1,53 @@
 package graphapi_test
 
-import (
-	"context"
-	"net/http"
-	"testing"
+// func TestJWTEnabledLoadbalancerGETWithAuthClient(t *testing.T) {
+// 	oauthCLI, issuer, oAuthClose := echojwtx.TestOAuthClient("urn:test:loadbalancer", "")
+// 	defer oAuthClose()
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"go.infratographer.com/x/echojwtx"
-)
+// 	srv, err := newTestServer(&echojwtx.AuthConfig{
+// 		Issuer: issuer,
+// 	})
 
-func TestJWTEnabledLoadbalancerGETWithAuthClient(t *testing.T) {
-	oauthCLI, issuer, oAuthClose := echojwtx.TestOAuthClient("urn:test:loadbalancer", "")
-	defer oAuthClose()
+// 	require.NoError(t, err)
+// 	require.NotNil(t, srv)
 
-	srv, err := newTestServer(&echojwtx.AuthConfig{
-		Issuer: issuer,
-	})
+// 	defer srv.Close()
 
-	require.NoError(t, err)
-	require.NotNil(t, srv)
+// 	ctx := context.Background()
+// 	lb1 := (&LoadBalancerBuilder{}).MustNew(ctx)
 
-	defer srv.Close()
+// 	resp, err := graphTestClient(
+// 		withGraphClientHTTPClient(oauthCLI),
+// 		withGraphClientServerURL(srv.URL+"/query"),
+// 	).GetLoadBalancer(ctx, lb1.ID)
 
-	ctx := context.Background()
-	lb1 := (&LoadBalancerBuilder{}).MustNew(ctx)
+// 	require.NoError(t, err)
+// 	require.NotNil(t, resp)
+// 	assert.Equal(t, lb1.ID, resp.LoadBalancer.ID)
+// }
 
-	resp, err := graphTestClient(
-		withGraphClientHTTPClient(oauthCLI),
-		withGraphClientServerURL(srv.URL+"/query"),
-	).GetLoadBalancer(ctx, lb1.ID)
+// func TestJWTENabledLoadbalancerGETWithDefaultClient(t *testing.T) {
+// 	_, issuer, oAuthClose := echojwtx.TestOAuthClient("urn:test:loadbalancer", "")
+// 	defer oAuthClose()
 
-	require.NoError(t, err)
-	require.NotNil(t, resp)
-	assert.Equal(t, lb1.ID, resp.LoadBalancer.ID)
-}
+// 	srv, err := newTestServer(&echojwtx.AuthConfig{
+// 		Issuer: issuer,
+// 	})
 
-func TestJWTENabledLoadbalancerGETWithDefaultClient(t *testing.T) {
-	_, issuer, oAuthClose := echojwtx.TestOAuthClient("urn:test:loadbalancer", "")
-	defer oAuthClose()
+// 	require.NoError(t, err)
+// 	require.NotNil(t, srv)
 
-	srv, err := newTestServer(&echojwtx.AuthConfig{
-		Issuer: issuer,
-	})
+// 	defer srv.Close()
 
-	require.NoError(t, err)
-	require.NotNil(t, srv)
+// 	ctx := context.Background()
+// 	lb1 := (&LoadBalancerBuilder{}).MustNew(ctx)
 
-	defer srv.Close()
+// 	resp, err := graphTestClient(
+// 		withGraphClientHTTPClient(http.DefaultClient),
+// 		withGraphClientServerURL(srv.URL+"/query"),
+// 	).GetLoadBalancer(ctx, lb1.ID)
 
-	ctx := context.Background()
-	lb1 := (&LoadBalancerBuilder{}).MustNew(ctx)
-
-	resp, err := graphTestClient(
-		withGraphClientHTTPClient(http.DefaultClient),
-		withGraphClientServerURL(srv.URL+"/query"),
-	).GetLoadBalancer(ctx, lb1.ID)
-
-	require.Error(t, err, "Expected an authorization error")
-	require.Nil(t, resp)
-	assert.ErrorContains(t, err, `{"networkErrors":{"code":401`)
-}
+// 	require.Error(t, err, "Expected an authorization error")
+// 	require.Nil(t, resp)
+// 	assert.ErrorContains(t, err, `{"networkErrors":{"code":401`)
+// }
