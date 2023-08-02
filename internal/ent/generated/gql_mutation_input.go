@@ -17,12 +17,15 @@
 package generated
 
 import (
+	"time"
+
 	"go.infratographer.com/load-balancer-api/internal/ent/generated/pool"
 	"go.infratographer.com/x/gidx"
 )
 
 // CreateLoadBalancerInput represents a mutation input for creating loadbalancers.
 type CreateLoadBalancerInput struct {
+	DeleteTime *time.Time
 	Name       string
 	OwnerID    gidx.PrefixedID
 	LocationID gidx.PrefixedID
@@ -32,6 +35,9 @@ type CreateLoadBalancerInput struct {
 
 // Mutate applies the CreateLoadBalancerInput on the LoadBalancerMutation builder.
 func (i *CreateLoadBalancerInput) Mutate(m *LoadBalancerMutation) {
+	if v := i.DeleteTime; v != nil {
+		m.SetDeleteTime(*v)
+	}
 	m.SetName(i.Name)
 	m.SetOwnerID(i.OwnerID)
 	m.SetLocationID(i.LocationID)
@@ -49,14 +55,22 @@ func (c *LoadBalancerCreate) SetInput(i CreateLoadBalancerInput) *LoadBalancerCr
 
 // UpdateLoadBalancerInput represents a mutation input for updating loadbalancers.
 type UpdateLoadBalancerInput struct {
-	Name          *string
-	ClearPorts    bool
-	AddPortIDs    []gidx.PrefixedID
-	RemovePortIDs []gidx.PrefixedID
+	ClearDeleteTime bool
+	DeleteTime      *time.Time
+	Name            *string
+	ClearPorts      bool
+	AddPortIDs      []gidx.PrefixedID
+	RemovePortIDs   []gidx.PrefixedID
 }
 
 // Mutate applies the UpdateLoadBalancerInput on the LoadBalancerMutation builder.
 func (i *UpdateLoadBalancerInput) Mutate(m *LoadBalancerMutation) {
+	if i.ClearDeleteTime {
+		m.ClearDeleteTime()
+	}
+	if v := i.DeleteTime; v != nil {
+		m.SetDeleteTime(*v)
+	}
 	if v := i.Name; v != nil {
 		m.SetName(*v)
 	}

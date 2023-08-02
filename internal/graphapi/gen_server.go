@@ -67,14 +67,15 @@ type ComplexityRoot struct {
 	}
 
 	LoadBalancer struct {
-		CreatedAt func(childComplexity int) int
-		ID        func(childComplexity int) int
-		Location  func(childComplexity int) int
-		Name      func(childComplexity int) int
-		Owner     func(childComplexity int) int
-		Ports     func(childComplexity int, after *entgql.Cursor[gidx.PrefixedID], first *int, before *entgql.Cursor[gidx.PrefixedID], last *int, orderBy *generated.LoadBalancerPortOrder, where *generated.LoadBalancerPortWhereInput) int
-		Provider  func(childComplexity int) int
-		UpdatedAt func(childComplexity int) int
+		CreatedAt  func(childComplexity int) int
+		DeleteTime func(childComplexity int) int
+		ID         func(childComplexity int) int
+		Location   func(childComplexity int) int
+		Name       func(childComplexity int) int
+		Owner      func(childComplexity int) int
+		Ports      func(childComplexity int, after *entgql.Cursor[gidx.PrefixedID], first *int, before *entgql.Cursor[gidx.PrefixedID], last *int, orderBy *generated.LoadBalancerPortOrder, where *generated.LoadBalancerPortWhereInput) int
+		Provider   func(childComplexity int) int
+		UpdatedAt  func(childComplexity int) int
 	}
 
 	LoadBalancerConnection struct {
@@ -443,6 +444,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.LoadBalancer.CreatedAt(childComplexity), true
+
+	case "LoadBalancer.deleteTime":
+		if e.complexity.LoadBalancer.DeleteTime == nil {
+			break
+		}
+
+		return e.complexity.LoadBalancer.DeleteTime(childComplexity), true
 
 	case "LoadBalancer.id":
 		if e.complexity.LoadBalancer.ID == nil {
@@ -1485,6 +1493,7 @@ var sources = []*ast.Source{
 directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
 """Input information to create a load balancer."""
 input CreateLoadBalancerInput {
+  deleteTime: Time
   """The name of the load balancer."""
   name: String!
   """The ID for the owner for this load balancer."""
@@ -1545,6 +1554,7 @@ type LoadBalancer implements Node & IPAddressable @key(fields: "id") @prefixedID
   id: ID!
   createdAt: Time!
   updatedAt: Time!
+  deleteTime: Time
   """The name of the load balancer."""
   name: String!
   ports(
@@ -2097,6 +2107,17 @@ input LoadBalancerWhereInput {
   updatedAtGTE: Time
   updatedAtLT: Time
   updatedAtLTE: Time
+  """delete_time field predicates"""
+  deleteTime: Time
+  deleteTimeNEQ: Time
+  deleteTimeIn: [Time!]
+  deleteTimeNotIn: [Time!]
+  deleteTimeGT: Time
+  deleteTimeGTE: Time
+  deleteTimeLT: Time
+  deleteTimeLTE: Time
+  deleteTimeIsNil: Boolean
+  deleteTimeNotNil: Boolean
   """name field predicates"""
   name: String
   nameNEQ: String
@@ -2172,6 +2193,8 @@ type Query {
 scalar Time
 """Input information to update a load balancer."""
 input UpdateLoadBalancerInput {
+  deleteTime: Time
+  clearDeleteTime: Boolean
   """The name of the load balancer."""
   name: String
   addPortIDs: [ID!]
@@ -3764,6 +3787,8 @@ func (ec *executionContext) fieldContext_Entity_findLoadBalancerByID(ctx context
 				return ec.fieldContext_LoadBalancer_createdAt(ctx, field)
 			case "updatedAt":
 				return ec.fieldContext_LoadBalancer_updatedAt(ctx, field)
+			case "deleteTime":
+				return ec.fieldContext_LoadBalancer_deleteTime(ctx, field)
 			case "name":
 				return ec.fieldContext_LoadBalancer_name(ctx, field)
 			case "ports":
@@ -4342,6 +4367,47 @@ func (ec *executionContext) fieldContext_LoadBalancer_updatedAt(ctx context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _LoadBalancer_deleteTime(ctx context.Context, field graphql.CollectedField, obj *generated.LoadBalancer) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_LoadBalancer_deleteTime(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeleteTime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalOTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_LoadBalancer_deleteTime(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LoadBalancer",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _LoadBalancer_name(ctx context.Context, field graphql.CollectedField, obj *generated.LoadBalancer) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_LoadBalancer_name(ctx, field)
 	if err != nil {
@@ -4801,6 +4867,8 @@ func (ec *executionContext) fieldContext_LoadBalancerCreatePayload_loadBalancer(
 				return ec.fieldContext_LoadBalancer_createdAt(ctx, field)
 			case "updatedAt":
 				return ec.fieldContext_LoadBalancer_updatedAt(ctx, field)
+			case "deleteTime":
+				return ec.fieldContext_LoadBalancer_deleteTime(ctx, field)
 			case "name":
 				return ec.fieldContext_LoadBalancer_name(ctx, field)
 			case "ports":
@@ -4904,6 +4972,8 @@ func (ec *executionContext) fieldContext_LoadBalancerEdge_node(ctx context.Conte
 				return ec.fieldContext_LoadBalancer_createdAt(ctx, field)
 			case "updatedAt":
 				return ec.fieldContext_LoadBalancer_updatedAt(ctx, field)
+			case "deleteTime":
+				return ec.fieldContext_LoadBalancer_deleteTime(ctx, field)
 			case "name":
 				return ec.fieldContext_LoadBalancer_name(ctx, field)
 			case "ports":
@@ -7032,6 +7102,8 @@ func (ec *executionContext) fieldContext_LoadBalancerPort_loadBalancer(ctx conte
 				return ec.fieldContext_LoadBalancer_createdAt(ctx, field)
 			case "updatedAt":
 				return ec.fieldContext_LoadBalancer_updatedAt(ctx, field)
+			case "deleteTime":
+				return ec.fieldContext_LoadBalancer_deleteTime(ctx, field)
 			case "name":
 				return ec.fieldContext_LoadBalancer_name(ctx, field)
 			case "ports":
@@ -8207,6 +8279,8 @@ func (ec *executionContext) fieldContext_LoadBalancerUpdatePayload_loadBalancer(
 				return ec.fieldContext_LoadBalancer_createdAt(ctx, field)
 			case "updatedAt":
 				return ec.fieldContext_LoadBalancer_updatedAt(ctx, field)
+			case "deleteTime":
+				return ec.fieldContext_LoadBalancer_deleteTime(ctx, field)
 			case "name":
 				return ec.fieldContext_LoadBalancer_name(ctx, field)
 			case "ports":
@@ -9494,6 +9568,8 @@ func (ec *executionContext) fieldContext_Query_loadBalancer(ctx context.Context,
 				return ec.fieldContext_LoadBalancer_createdAt(ctx, field)
 			case "updatedAt":
 				return ec.fieldContext_LoadBalancer_updatedAt(ctx, field)
+			case "deleteTime":
+				return ec.fieldContext_LoadBalancer_deleteTime(ctx, field)
 			case "name":
 				return ec.fieldContext_LoadBalancer_name(ctx, field)
 			case "ports":
@@ -11952,13 +12028,22 @@ func (ec *executionContext) unmarshalInputCreateLoadBalancerInput(ctx context.Co
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"name", "ownerID", "locationID", "portIDs", "providerID"}
+	fieldsInOrder := [...]string{"deleteTime", "name", "ownerID", "locationID", "portIDs", "providerID"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
+		case "deleteTime":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deleteTime"))
+			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DeleteTime = data
 		case "name":
 			var err error
 
@@ -14394,7 +14479,7 @@ func (ec *executionContext) unmarshalInputLoadBalancerWhereInput(ctx context.Con
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "name", "nameNEQ", "nameIn", "nameNotIn", "nameGT", "nameGTE", "nameLT", "nameLTE", "nameContains", "nameHasPrefix", "nameHasSuffix", "nameEqualFold", "nameContainsFold", "hasPorts", "hasPortsWith", "hasProvider", "hasProviderWith"}
+	fieldsInOrder := [...]string{"not", "and", "or", "id", "idNEQ", "idIn", "idNotIn", "idGT", "idGTE", "idLT", "idLTE", "createdAt", "createdAtNEQ", "createdAtIn", "createdAtNotIn", "createdAtGT", "createdAtGTE", "createdAtLT", "createdAtLTE", "updatedAt", "updatedAtNEQ", "updatedAtIn", "updatedAtNotIn", "updatedAtGT", "updatedAtGTE", "updatedAtLT", "updatedAtLTE", "deleteTime", "deleteTimeNEQ", "deleteTimeIn", "deleteTimeNotIn", "deleteTimeGT", "deleteTimeGTE", "deleteTimeLT", "deleteTimeLTE", "deleteTimeIsNil", "deleteTimeNotNil", "name", "nameNEQ", "nameIn", "nameNotIn", "nameGT", "nameGTE", "nameLT", "nameLTE", "nameContains", "nameHasPrefix", "nameHasSuffix", "nameEqualFold", "nameContainsFold", "hasPorts", "hasPortsWith", "hasProvider", "hasProviderWith"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -14644,6 +14729,96 @@ func (ec *executionContext) unmarshalInputLoadBalancerWhereInput(ctx context.Con
 				return it, err
 			}
 			it.UpdatedAtLTE = data
+		case "deleteTime":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deleteTime"))
+			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DeleteTime = data
+		case "deleteTimeNEQ":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deleteTimeNEQ"))
+			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DeleteTimeNEQ = data
+		case "deleteTimeIn":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deleteTimeIn"))
+			data, err := ec.unmarshalOTime2ᚕtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DeleteTimeIn = data
+		case "deleteTimeNotIn":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deleteTimeNotIn"))
+			data, err := ec.unmarshalOTime2ᚕtimeᚐTimeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DeleteTimeNotIn = data
+		case "deleteTimeGT":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deleteTimeGT"))
+			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DeleteTimeGT = data
+		case "deleteTimeGTE":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deleteTimeGTE"))
+			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DeleteTimeGTE = data
+		case "deleteTimeLT":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deleteTimeLT"))
+			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DeleteTimeLT = data
+		case "deleteTimeLTE":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deleteTimeLTE"))
+			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DeleteTimeLTE = data
+		case "deleteTimeIsNil":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deleteTimeIsNil"))
+			data, err := ec.unmarshalOBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DeleteTimeIsNil = data
+		case "deleteTimeNotNil":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deleteTimeNotNil"))
+			data, err := ec.unmarshalOBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DeleteTimeNotNil = data
 		case "name":
 			var err error
 
@@ -14810,13 +14985,31 @@ func (ec *executionContext) unmarshalInputUpdateLoadBalancerInput(ctx context.Co
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"name", "addPortIDs", "removePortIDs", "clearPorts"}
+	fieldsInOrder := [...]string{"deleteTime", "clearDeleteTime", "name", "addPortIDs", "removePortIDs", "clearPorts"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
+		case "deleteTime":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("deleteTime"))
+			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DeleteTime = data
+		case "clearDeleteTime":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("clearDeleteTime"))
+			data, err := ec.unmarshalOBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ClearDeleteTime = data
 		case "name":
 			var err error
 
@@ -15439,6 +15632,8 @@ func (ec *executionContext) _LoadBalancer(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
+		case "deleteTime":
+			out.Values[i] = ec._LoadBalancer_deleteTime(ctx, field, obj)
 		case "name":
 			out.Values[i] = ec._LoadBalancer_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -19954,6 +20149,16 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	res := graphql.MarshalString(*v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
+	res, err := graphql.UnmarshalTime(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOTime2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
+	res := graphql.MarshalTime(v)
 	return res
 }
 

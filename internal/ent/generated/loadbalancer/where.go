@@ -80,6 +80,11 @@ func UpdatedAt(v time.Time) predicate.LoadBalancer {
 	return predicate.LoadBalancer(sql.FieldEQ(FieldUpdatedAt, v))
 }
 
+// DeleteTime applies equality check predicate on the "delete_time" field. It's identical to DeleteTimeEQ.
+func DeleteTime(v time.Time) predicate.LoadBalancer {
+	return predicate.LoadBalancer(sql.FieldEQ(FieldDeleteTime, v))
+}
+
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.LoadBalancer {
 	return predicate.LoadBalancer(sql.FieldEQ(FieldName, v))
@@ -178,6 +183,56 @@ func UpdatedAtLT(v time.Time) predicate.LoadBalancer {
 // UpdatedAtLTE applies the LTE predicate on the "updated_at" field.
 func UpdatedAtLTE(v time.Time) predicate.LoadBalancer {
 	return predicate.LoadBalancer(sql.FieldLTE(FieldUpdatedAt, v))
+}
+
+// DeleteTimeEQ applies the EQ predicate on the "delete_time" field.
+func DeleteTimeEQ(v time.Time) predicate.LoadBalancer {
+	return predicate.LoadBalancer(sql.FieldEQ(FieldDeleteTime, v))
+}
+
+// DeleteTimeNEQ applies the NEQ predicate on the "delete_time" field.
+func DeleteTimeNEQ(v time.Time) predicate.LoadBalancer {
+	return predicate.LoadBalancer(sql.FieldNEQ(FieldDeleteTime, v))
+}
+
+// DeleteTimeIn applies the In predicate on the "delete_time" field.
+func DeleteTimeIn(vs ...time.Time) predicate.LoadBalancer {
+	return predicate.LoadBalancer(sql.FieldIn(FieldDeleteTime, vs...))
+}
+
+// DeleteTimeNotIn applies the NotIn predicate on the "delete_time" field.
+func DeleteTimeNotIn(vs ...time.Time) predicate.LoadBalancer {
+	return predicate.LoadBalancer(sql.FieldNotIn(FieldDeleteTime, vs...))
+}
+
+// DeleteTimeGT applies the GT predicate on the "delete_time" field.
+func DeleteTimeGT(v time.Time) predicate.LoadBalancer {
+	return predicate.LoadBalancer(sql.FieldGT(FieldDeleteTime, v))
+}
+
+// DeleteTimeGTE applies the GTE predicate on the "delete_time" field.
+func DeleteTimeGTE(v time.Time) predicate.LoadBalancer {
+	return predicate.LoadBalancer(sql.FieldGTE(FieldDeleteTime, v))
+}
+
+// DeleteTimeLT applies the LT predicate on the "delete_time" field.
+func DeleteTimeLT(v time.Time) predicate.LoadBalancer {
+	return predicate.LoadBalancer(sql.FieldLT(FieldDeleteTime, v))
+}
+
+// DeleteTimeLTE applies the LTE predicate on the "delete_time" field.
+func DeleteTimeLTE(v time.Time) predicate.LoadBalancer {
+	return predicate.LoadBalancer(sql.FieldLTE(FieldDeleteTime, v))
+}
+
+// DeleteTimeIsNil applies the IsNil predicate on the "delete_time" field.
+func DeleteTimeIsNil() predicate.LoadBalancer {
+	return predicate.LoadBalancer(sql.FieldIsNull(FieldDeleteTime))
+}
+
+// DeleteTimeNotNil applies the NotNil predicate on the "delete_time" field.
+func DeleteTimeNotNil() predicate.LoadBalancer {
+	return predicate.LoadBalancer(sql.FieldNotNull(FieldDeleteTime))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.

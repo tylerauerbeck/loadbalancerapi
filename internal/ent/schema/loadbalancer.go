@@ -12,6 +12,7 @@ import (
 	"go.infratographer.com/x/entx"
 	"go.infratographer.com/x/gidx"
 
+	"go.infratographer.com/load-balancer-api/internal/ent/generated/softdelete"
 	"go.infratographer.com/load-balancer-api/x/pubsubinfo"
 )
 
@@ -24,7 +25,7 @@ type LoadBalancer struct {
 func (LoadBalancer) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		entx.NewTimestampMixin(),
-		// softdelete.Mixin{},
+		softdelete.SoftDeleteMixin{},
 	}
 }
 
@@ -123,6 +124,10 @@ func (LoadBalancer) Annotations() []schema.Annotation {
 			entgql.MutationUpdate().Description("Input information to update a load balancer."),
 		),
 	}
+}
+
+func (LoadBalancer) Hooks() []ent.Hook {
+	return entx.NewSoftDeleteMixin().Hooks()
 }
 
 func prefixIDDirective(prefix string) entgql.Annotation {

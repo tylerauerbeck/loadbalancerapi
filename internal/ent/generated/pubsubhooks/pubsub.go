@@ -94,6 +94,28 @@ func LoadBalancerHooks() []ent.Hook {
 						})
 					}
 
+					cv_delete_time := ""
+					delete_time, ok := m.DeleteTime()
+
+					if ok {
+						cv_delete_time = delete_time.Format(time.RFC3339)
+						pv_delete_time := ""
+						if !m.Op().Is(ent.OpCreate) {
+							ov, err := m.OldDeleteTime(ctx)
+							if err != nil {
+								pv_delete_time = "<unknown>"
+							} else {
+								pv_delete_time = ov.Format(time.RFC3339)
+							}
+						}
+
+						changeset = append(changeset, events.FieldChange{
+							Field:         "delete_time",
+							PreviousValue: pv_delete_time,
+							CurrentValue:  cv_delete_time,
+						})
+					}
+
 					cv_name := ""
 					name, ok := m.Name()
 

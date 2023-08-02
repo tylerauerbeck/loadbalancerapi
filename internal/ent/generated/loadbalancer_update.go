@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -40,6 +41,26 @@ type LoadBalancerUpdate struct {
 // Where appends a list predicates to the LoadBalancerUpdate builder.
 func (lbu *LoadBalancerUpdate) Where(ps ...predicate.LoadBalancer) *LoadBalancerUpdate {
 	lbu.mutation.Where(ps...)
+	return lbu
+}
+
+// SetDeleteTime sets the "delete_time" field.
+func (lbu *LoadBalancerUpdate) SetDeleteTime(t time.Time) *LoadBalancerUpdate {
+	lbu.mutation.SetDeleteTime(t)
+	return lbu
+}
+
+// SetNillableDeleteTime sets the "delete_time" field if the given value is not nil.
+func (lbu *LoadBalancerUpdate) SetNillableDeleteTime(t *time.Time) *LoadBalancerUpdate {
+	if t != nil {
+		lbu.SetDeleteTime(*t)
+	}
+	return lbu
+}
+
+// ClearDeleteTime clears the value of the "delete_time" field.
+func (lbu *LoadBalancerUpdate) ClearDeleteTime() *LoadBalancerUpdate {
+	lbu.mutation.ClearDeleteTime()
 	return lbu
 }
 
@@ -92,7 +113,9 @@ func (lbu *LoadBalancerUpdate) RemovePorts(p ...*Port) *LoadBalancerUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (lbu *LoadBalancerUpdate) Save(ctx context.Context) (int, error) {
-	lbu.defaults()
+	if err := lbu.defaults(); err != nil {
+		return 0, err
+	}
 	return withHooks(ctx, lbu.sqlSave, lbu.mutation, lbu.hooks)
 }
 
@@ -119,11 +142,15 @@ func (lbu *LoadBalancerUpdate) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (lbu *LoadBalancerUpdate) defaults() {
+func (lbu *LoadBalancerUpdate) defaults() error {
 	if _, ok := lbu.mutation.UpdatedAt(); !ok {
+		if loadbalancer.UpdateDefaultUpdatedAt == nil {
+			return fmt.Errorf("generated: uninitialized loadbalancer.UpdateDefaultUpdatedAt (forgotten import generated/runtime?)")
+		}
 		v := loadbalancer.UpdateDefaultUpdatedAt()
 		lbu.mutation.SetUpdatedAt(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -153,6 +180,12 @@ func (lbu *LoadBalancerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := lbu.mutation.UpdatedAt(); ok {
 		_spec.SetField(loadbalancer.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := lbu.mutation.DeleteTime(); ok {
+		_spec.SetField(loadbalancer.FieldDeleteTime, field.TypeTime, value)
+	}
+	if lbu.mutation.DeleteTimeCleared() {
+		_spec.ClearField(loadbalancer.FieldDeleteTime, field.TypeTime)
 	}
 	if value, ok := lbu.mutation.Name(); ok {
 		_spec.SetField(loadbalancer.FieldName, field.TypeString, value)
@@ -222,6 +255,26 @@ type LoadBalancerUpdateOne struct {
 	mutation *LoadBalancerMutation
 }
 
+// SetDeleteTime sets the "delete_time" field.
+func (lbuo *LoadBalancerUpdateOne) SetDeleteTime(t time.Time) *LoadBalancerUpdateOne {
+	lbuo.mutation.SetDeleteTime(t)
+	return lbuo
+}
+
+// SetNillableDeleteTime sets the "delete_time" field if the given value is not nil.
+func (lbuo *LoadBalancerUpdateOne) SetNillableDeleteTime(t *time.Time) *LoadBalancerUpdateOne {
+	if t != nil {
+		lbuo.SetDeleteTime(*t)
+	}
+	return lbuo
+}
+
+// ClearDeleteTime clears the value of the "delete_time" field.
+func (lbuo *LoadBalancerUpdateOne) ClearDeleteTime() *LoadBalancerUpdateOne {
+	lbuo.mutation.ClearDeleteTime()
+	return lbuo
+}
+
 // SetName sets the "name" field.
 func (lbuo *LoadBalancerUpdateOne) SetName(s string) *LoadBalancerUpdateOne {
 	lbuo.mutation.SetName(s)
@@ -284,7 +337,9 @@ func (lbuo *LoadBalancerUpdateOne) Select(field string, fields ...string) *LoadB
 
 // Save executes the query and returns the updated LoadBalancer entity.
 func (lbuo *LoadBalancerUpdateOne) Save(ctx context.Context) (*LoadBalancer, error) {
-	lbuo.defaults()
+	if err := lbuo.defaults(); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, lbuo.sqlSave, lbuo.mutation, lbuo.hooks)
 }
 
@@ -311,11 +366,15 @@ func (lbuo *LoadBalancerUpdateOne) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (lbuo *LoadBalancerUpdateOne) defaults() {
+func (lbuo *LoadBalancerUpdateOne) defaults() error {
 	if _, ok := lbuo.mutation.UpdatedAt(); !ok {
+		if loadbalancer.UpdateDefaultUpdatedAt == nil {
+			return fmt.Errorf("generated: uninitialized loadbalancer.UpdateDefaultUpdatedAt (forgotten import generated/runtime?)")
+		}
 		v := loadbalancer.UpdateDefaultUpdatedAt()
 		lbuo.mutation.SetUpdatedAt(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -362,6 +421,12 @@ func (lbuo *LoadBalancerUpdateOne) sqlSave(ctx context.Context) (_node *LoadBala
 	}
 	if value, ok := lbuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(loadbalancer.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := lbuo.mutation.DeleteTime(); ok {
+		_spec.SetField(loadbalancer.FieldDeleteTime, field.TypeTime, value)
+	}
+	if lbuo.mutation.DeleteTimeCleared() {
+		_spec.ClearField(loadbalancer.FieldDeleteTime, field.TypeTime)
 	}
 	if value, ok := lbuo.mutation.Name(); ok {
 		_spec.SetField(loadbalancer.FieldName, field.TypeString, value)

@@ -67,6 +67,18 @@ type LoadBalancerWhereInput struct {
 	UpdatedAtLT    *time.Time  `json:"updatedAtLT,omitempty"`
 	UpdatedAtLTE   *time.Time  `json:"updatedAtLTE,omitempty"`
 
+	// "delete_time" field predicates.
+	DeleteTime       *time.Time  `json:"deleteTime,omitempty"`
+	DeleteTimeNEQ    *time.Time  `json:"deleteTimeNEQ,omitempty"`
+	DeleteTimeIn     []time.Time `json:"deleteTimeIn,omitempty"`
+	DeleteTimeNotIn  []time.Time `json:"deleteTimeNotIn,omitempty"`
+	DeleteTimeGT     *time.Time  `json:"deleteTimeGT,omitempty"`
+	DeleteTimeGTE    *time.Time  `json:"deleteTimeGTE,omitempty"`
+	DeleteTimeLT     *time.Time  `json:"deleteTimeLT,omitempty"`
+	DeleteTimeLTE    *time.Time  `json:"deleteTimeLTE,omitempty"`
+	DeleteTimeIsNil  bool        `json:"deleteTimeIsNil,omitempty"`
+	DeleteTimeNotNil bool        `json:"deleteTimeNotNil,omitempty"`
+
 	// "name" field predicates.
 	Name             *string  `json:"name,omitempty"`
 	NameNEQ          *string  `json:"nameNEQ,omitempty"`
@@ -233,6 +245,36 @@ func (i *LoadBalancerWhereInput) P() (predicate.LoadBalancer, error) {
 	}
 	if i.UpdatedAtLTE != nil {
 		predicates = append(predicates, loadbalancer.UpdatedAtLTE(*i.UpdatedAtLTE))
+	}
+	if i.DeleteTime != nil {
+		predicates = append(predicates, loadbalancer.DeleteTimeEQ(*i.DeleteTime))
+	}
+	if i.DeleteTimeNEQ != nil {
+		predicates = append(predicates, loadbalancer.DeleteTimeNEQ(*i.DeleteTimeNEQ))
+	}
+	if len(i.DeleteTimeIn) > 0 {
+		predicates = append(predicates, loadbalancer.DeleteTimeIn(i.DeleteTimeIn...))
+	}
+	if len(i.DeleteTimeNotIn) > 0 {
+		predicates = append(predicates, loadbalancer.DeleteTimeNotIn(i.DeleteTimeNotIn...))
+	}
+	if i.DeleteTimeGT != nil {
+		predicates = append(predicates, loadbalancer.DeleteTimeGT(*i.DeleteTimeGT))
+	}
+	if i.DeleteTimeGTE != nil {
+		predicates = append(predicates, loadbalancer.DeleteTimeGTE(*i.DeleteTimeGTE))
+	}
+	if i.DeleteTimeLT != nil {
+		predicates = append(predicates, loadbalancer.DeleteTimeLT(*i.DeleteTimeLT))
+	}
+	if i.DeleteTimeLTE != nil {
+		predicates = append(predicates, loadbalancer.DeleteTimeLTE(*i.DeleteTimeLTE))
+	}
+	if i.DeleteTimeIsNil {
+		predicates = append(predicates, loadbalancer.DeleteTimeIsNil())
+	}
+	if i.DeleteTimeNotNil {
+		predicates = append(predicates, loadbalancer.DeleteTimeNotNil())
 	}
 	if i.Name != nil {
 		predicates = append(predicates, loadbalancer.NameEQ(*i.Name))

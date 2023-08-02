@@ -18,6 +18,7 @@ func main() {
 	xExt, err := entx.NewExtension(
 		entx.WithFederation(),
 		entx.WithJSONScalar(),
+		entx.WithSoftDelete(),
 	)
 	if err != nil {
 		log.Fatalf("creating entx extension: %v", err)

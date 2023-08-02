@@ -80,13 +80,16 @@ func (r *mutationResolver) LoadBalancerDelete(ctx context.Context, id gidx.Prefi
 	}
 
 	// delete loadbalancer
-	if err = tx.LoadBalancer.DeleteOneID(id).Exec(ctx); err != nil {
-		r.logger.Errorw("failed to delete loadbalancer", "loadbalancer", id.String(), "error", err)
-		if rerr := tx.Rollback(); rerr != nil {
-			r.logger.Errorw("failed to rollback transaction", "error", rerr, "stage", "delete loadbalancer")
-		}
-		return nil, err
-	}
+	// if err = tx.LoadBalancer.DeleteOneID(id).Exec(ctx); err != nil {
+	// 	r.logger.Errorw("failed to delete loadbalancer", "loadbalancer", id.String(), "error", err)
+	// 	if rerr := tx.Rollback(); rerr != nil {
+	// 		r.logger.Errorw("failed to rollback transaction", "error", rerr, "stage", "delete loadbalancer")
+	// 	}
+	// 	return nil, err
+	// }
+
+	// softdelete loadbalancer
+	// if err := tx.LoadBalancer.u
 
 	if err = tx.Commit(); err != nil {
 		r.logger.Errorw("failed to commit transaction", "error", err)

@@ -30,6 +30,7 @@ type Entity interface {
 
 // Input information to create a load balancer.
 type CreateLoadBalancerInput struct {
+	DeleteTime *time.Time `json:"deleteTime,omitempty"`
 	// The name of the load balancer.
 	Name string `json:"name"`
 	// The ID for the owner for this load balancer.
@@ -79,9 +80,10 @@ type CreateLoadBalancerProviderInput struct {
 
 type LoadBalancer struct {
 	// The ID for the load balancer.
-	ID        gidx.PrefixedID `json:"id"`
-	CreatedAt time.Time       `json:"createdAt"`
-	UpdatedAt time.Time       `json:"updatedAt"`
+	ID         gidx.PrefixedID `json:"id"`
+	CreatedAt  time.Time       `json:"createdAt"`
+	UpdatedAt  time.Time       `json:"updatedAt"`
+	DeleteTime *time.Time      `json:"deleteTime,omitempty"`
 	// The name of the load balancer.
 	Name  string                     `json:"name"`
 	Ports LoadBalancerPortConnection `json:"ports"`
@@ -685,6 +687,17 @@ type LoadBalancerWhereInput struct {
 	UpdatedAtGte   *time.Time   `json:"updatedAtGTE,omitempty"`
 	UpdatedAtLt    *time.Time   `json:"updatedAtLT,omitempty"`
 	UpdatedAtLte   *time.Time   `json:"updatedAtLTE,omitempty"`
+	// delete_time field predicates
+	DeleteTime       *time.Time   `json:"deleteTime,omitempty"`
+	DeleteTimeNeq    *time.Time   `json:"deleteTimeNEQ,omitempty"`
+	DeleteTimeIn     []*time.Time `json:"deleteTimeIn,omitempty"`
+	DeleteTimeNotIn  []*time.Time `json:"deleteTimeNotIn,omitempty"`
+	DeleteTimeGt     *time.Time   `json:"deleteTimeGT,omitempty"`
+	DeleteTimeGte    *time.Time   `json:"deleteTimeGTE,omitempty"`
+	DeleteTimeLt     *time.Time   `json:"deleteTimeLT,omitempty"`
+	DeleteTimeLte    *time.Time   `json:"deleteTimeLTE,omitempty"`
+	DeleteTimeIsNil  *bool        `json:"deleteTimeIsNil,omitempty"`
+	DeleteTimeNotNil *bool        `json:"deleteTimeNotNil,omitempty"`
 	// name field predicates
 	Name             *string  `json:"name,omitempty"`
 	NameNeq          *string  `json:"nameNEQ,omitempty"`
@@ -738,6 +751,8 @@ func (ResourceOwner) IsEntity() {}
 
 // Input information to update a load balancer.
 type UpdateLoadBalancerInput struct {
+	DeleteTime      *time.Time `json:"deleteTime,omitempty"`
+	ClearDeleteTime *bool      `json:"clearDeleteTime,omitempty"`
 	// The name of the load balancer.
 	Name          *string           `json:"name,omitempty"`
 	AddPortIDs    []gidx.PrefixedID `json:"addPortIDs,omitempty"`

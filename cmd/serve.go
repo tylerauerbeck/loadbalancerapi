@@ -21,6 +21,8 @@ import (
 	"go.infratographer.com/x/versionx"
 	"go.uber.org/zap"
 
+	// _ "go.infratographer.com/load-balancer-api/internal/ent/runtime"
+
 	"go.infratographer.com/load-balancer-api/internal/config"
 	ent "go.infratographer.com/load-balancer-api/internal/ent/generated"
 	"go.infratographer.com/load-balancer-api/internal/graphapi"

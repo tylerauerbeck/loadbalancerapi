@@ -13,6 +13,7 @@ directive @shareable repeatable on FIELD_DEFINITION | OBJECT
 directive @tag(name: String!) repeatable on ARGUMENT_DEFINITION | ENUM | ENUM_VALUE | FIELD_DEFINITION | INPUT_FIELD_DEFINITION | INPUT_OBJECT | INTERFACE | OBJECT | SCALAR | UNION
 """Input information to create a load balancer."""
 input CreateLoadBalancerInput {
+	deleteTime: Time
 	"""The name of the load balancer."""
 	name: String!
 	"""The ID for the owner for this load balancer."""
@@ -77,6 +78,7 @@ type LoadBalancer implements Node & IPAddressable @key(fields: "id") @prefixedID
 	id: ID!
 	createdAt: Time!
 	updatedAt: Time!
+	deleteTime: Time
 	"""The name of the load balancer."""
 	name: String!
 	ports(
@@ -712,6 +714,17 @@ input LoadBalancerWhereInput {
 	updatedAtGTE: Time
 	updatedAtLT: Time
 	updatedAtLTE: Time
+	"""delete_time field predicates"""
+	deleteTime: Time
+	deleteTimeNEQ: Time
+	deleteTimeIn: [Time!]
+	deleteTimeNotIn: [Time!]
+	deleteTimeGT: Time
+	deleteTimeGTE: Time
+	deleteTimeLT: Time
+	deleteTimeLTE: Time
+	deleteTimeIsNil: Boolean
+	deleteTimeNotNil: Boolean
 	"""name field predicates"""
 	name: String
 	nameNEQ: String
@@ -918,6 +931,8 @@ type ResourceOwner @interfaceObject @key(fields: "id") {
 scalar Time
 """Input information to update a load balancer."""
 input UpdateLoadBalancerInput {
+	deleteTime: Time
+	clearDeleteTime: Boolean
 	"""The name of the load balancer."""
 	name: String
 	addPortIDs: [ID!]
