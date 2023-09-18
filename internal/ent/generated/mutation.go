@@ -1543,6 +1543,7 @@ type PoolMutation struct {
 	id             *gidx.PrefixedID
 	created_at     *time.Time
 	updated_at     *time.Time
+	deleted_at     *time.Time
 	name           *string
 	protocol       *pool.Protocol
 	owner_id       *gidx.PrefixedID
@@ -1732,6 +1733,55 @@ func (m *PoolMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error
 // ResetUpdatedAt resets all changes to the "updated_at" field.
 func (m *PoolMutation) ResetUpdatedAt() {
 	m.updated_at = nil
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *PoolMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *PoolMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the Pool entity.
+// If the Pool object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PoolMutation) OldDeletedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *PoolMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[pool.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *PoolMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[pool.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *PoolMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, pool.FieldDeletedAt)
 }
 
 // SetName sets the "name" field.
@@ -1984,12 +2034,15 @@ func (m *PoolMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PoolMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.created_at != nil {
 		fields = append(fields, pool.FieldCreatedAt)
 	}
 	if m.updated_at != nil {
 		fields = append(fields, pool.FieldUpdatedAt)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, pool.FieldDeletedAt)
 	}
 	if m.name != nil {
 		fields = append(fields, pool.FieldName)
@@ -2012,6 +2065,8 @@ func (m *PoolMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case pool.FieldUpdatedAt:
 		return m.UpdatedAt()
+	case pool.FieldDeletedAt:
+		return m.DeletedAt()
 	case pool.FieldName:
 		return m.Name()
 	case pool.FieldProtocol:
@@ -2031,6 +2086,8 @@ func (m *PoolMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldCreatedAt(ctx)
 	case pool.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
+	case pool.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
 	case pool.FieldName:
 		return m.OldName(ctx)
 	case pool.FieldProtocol:
@@ -2059,6 +2116,13 @@ func (m *PoolMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdatedAt(v)
+		return nil
+	case pool.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
 		return nil
 	case pool.FieldName:
 		v, ok := value.(string)
@@ -2110,7 +2174,11 @@ func (m *PoolMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *PoolMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(pool.FieldDeletedAt) {
+		fields = append(fields, pool.FieldDeletedAt)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -2123,6 +2191,11 @@ func (m *PoolMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *PoolMutation) ClearField(name string) error {
+	switch name {
+	case pool.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	}
 	return fmt.Errorf("unknown Pool nullable field %s", name)
 }
 
@@ -2135,6 +2208,9 @@ func (m *PoolMutation) ResetField(name string) error {
 		return nil
 	case pool.FieldUpdatedAt:
 		m.ResetUpdatedAt()
+		return nil
+	case pool.FieldDeletedAt:
+		m.ResetDeletedAt()
 		return nil
 	case pool.FieldName:
 		m.ResetName()

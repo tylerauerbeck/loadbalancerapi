@@ -29,6 +29,8 @@ import (
 	"go.infratographer.com/load-balancer-api/internal/manualhooks"
 
 	"go.infratographer.com/x/events"
+
+	_ "go.infratographer.com/load-balancer-api/internal/ent/generated/runtime"
 )
 
 const (

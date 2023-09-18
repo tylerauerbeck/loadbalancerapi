@@ -608,279 +608,293 @@ func OriginHooks() []ent.Hook {
 }
 
 func PoolHooks() []ent.Hook {
-	return []ent.Hook{
-		hook.On(
-			func(next ent.Mutator) ent.Mutator {
-				return hook.PoolFunc(func(ctx context.Context, m *generated.PoolMutation) (ent.Value, error) {
-					var err error
-					additionalSubjects := []gidx.PrefixedID{}
-					relationships := []events.AuthRelationshipRelation{}
+	cuhook := hook.On(
+		func(next ent.Mutator) ent.Mutator {
+			return hook.PoolFunc(func(ctx context.Context, m *generated.PoolMutation) (ent.Value, error) {
+				var err error
+				additionalSubjects := []gidx.PrefixedID{}
+				relationships := []events.AuthRelationshipRelation{}
 
-					objID, ok := m.ID()
-					if !ok {
-						return nil, fmt.Errorf("object doesn't have an id %s", objID)
-					}
+				objID, ok := m.ID()
+				if !ok {
+					return nil, fmt.Errorf("object doesn't have an id %s", objID)
+				}
 
-					changeset := []events.FieldChange{}
-					cv_created_at := ""
-					created_at, ok := m.CreatedAt()
+				changeset := []events.FieldChange{}
+				cv_created_at := ""
+				created_at, ok := m.CreatedAt()
 
-					if ok {
-						cv_created_at = created_at.Format(time.RFC3339)
-						pv_created_at := ""
-						if !m.Op().Is(ent.OpCreate) {
-							ov, err := m.OldCreatedAt(ctx)
-							if err != nil {
-								pv_created_at = "<unknown>"
-							} else {
-								pv_created_at = ov.Format(time.RFC3339)
-							}
-						}
-
-						changeset = append(changeset, events.FieldChange{
-							Field:         "created_at",
-							PreviousValue: pv_created_at,
-							CurrentValue:  cv_created_at,
-						})
-					}
-
-					cv_updated_at := ""
-					updated_at, ok := m.UpdatedAt()
-
-					if ok {
-						cv_updated_at = updated_at.Format(time.RFC3339)
-						pv_updated_at := ""
-						if !m.Op().Is(ent.OpCreate) {
-							ov, err := m.OldUpdatedAt(ctx)
-							if err != nil {
-								pv_updated_at = "<unknown>"
-							} else {
-								pv_updated_at = ov.Format(time.RFC3339)
-							}
-						}
-
-						changeset = append(changeset, events.FieldChange{
-							Field:         "updated_at",
-							PreviousValue: pv_updated_at,
-							CurrentValue:  cv_updated_at,
-						})
-					}
-
-					cv_name := ""
-					name, ok := m.Name()
-
-					if ok {
-						cv_name = fmt.Sprintf("%s", fmt.Sprint(name))
-						pv_name := ""
-						if !m.Op().Is(ent.OpCreate) {
-							ov, err := m.OldName(ctx)
-							if err != nil {
-								pv_name = "<unknown>"
-							} else {
-								pv_name = fmt.Sprintf("%s", fmt.Sprint(ov))
-							}
-						}
-
-						changeset = append(changeset, events.FieldChange{
-							Field:         "name",
-							PreviousValue: pv_name,
-							CurrentValue:  cv_name,
-						})
-					}
-
-					cv_protocol := ""
-					protocol, ok := m.Protocol()
-
-					if ok {
-						cv_protocol = fmt.Sprintf("%s", fmt.Sprint(protocol))
-						pv_protocol := ""
-						if !m.Op().Is(ent.OpCreate) {
-							ov, err := m.OldProtocol(ctx)
-							if err != nil {
-								pv_protocol = "<unknown>"
-							} else {
-								pv_protocol = fmt.Sprintf("%s", fmt.Sprint(ov))
-							}
-						}
-
-						changeset = append(changeset, events.FieldChange{
-							Field:         "protocol",
-							PreviousValue: pv_protocol,
-							CurrentValue:  cv_protocol,
-						})
-					}
-
-					cv_owner_id := ""
-					owner_id, ok := m.OwnerID()
-					if !ok && !m.Op().Is(ent.OpCreate) {
-						// since we are doing an update or delete and these fields didn't change, load the "old" value
-						owner_id, err = m.OldOwnerID(ctx)
+				if ok {
+					cv_created_at = created_at.Format(time.RFC3339)
+					pv_created_at := ""
+					if !m.Op().Is(ent.OpCreate) {
+						ov, err := m.OldCreatedAt(ctx)
 						if err != nil {
-							return nil, err
+							pv_created_at = "<unknown>"
+						} else {
+							pv_created_at = ov.Format(time.RFC3339)
 						}
 					}
-					additionalSubjects = append(additionalSubjects, owner_id)
 
-					relationships = append(relationships, events.AuthRelationshipRelation{
-						Relation:  "owner",
-						SubjectID: owner_id,
+					changeset = append(changeset, events.FieldChange{
+						Field:         "created_at",
+						PreviousValue: pv_created_at,
+						CurrentValue:  cv_created_at,
 					})
+				}
 
-					if ok {
-						cv_owner_id = fmt.Sprintf("%s", fmt.Sprint(owner_id))
-						pv_owner_id := ""
-						if !m.Op().Is(ent.OpCreate) {
-							ov, err := m.OldOwnerID(ctx)
-							if err != nil {
-								pv_owner_id = "<unknown>"
-							} else {
-								pv_owner_id = fmt.Sprintf("%s", fmt.Sprint(ov))
-							}
-						}
+				cv_updated_at := ""
+				updated_at, ok := m.UpdatedAt()
 
-						changeset = append(changeset, events.FieldChange{
-							Field:         "owner_id",
-							PreviousValue: pv_owner_id,
-							CurrentValue:  cv_owner_id,
-						})
-					}
-
-					msg := events.ChangeMessage{
-						EventType:            eventType(m.Op()),
-						SubjectID:            objID,
-						AdditionalSubjectIDs: additionalSubjects,
-						Timestamp:            time.Now().UTC(),
-						FieldChanges:         changeset,
-					}
-
-					// complete the mutation before we process the event
-					retValue, err := next.Mutate(ctx, m)
-					if err != nil {
-						return retValue, err
-					}
-
-					addSubjPort, err := m.Client().Port.Query().Where(port.HasPoolsWith(pool.IDEQ(objID))).Only(ctx)
-					if err == nil {
-						if !slices.Contains(msg.AdditionalSubjectIDs, addSubjPort.ID) && objID != addSubjPort.ID {
-							msg.AdditionalSubjectIDs = append(msg.AdditionalSubjectIDs, addSubjPort.ID)
-						}
-
-						if !slices.Contains(msg.AdditionalSubjectIDs, addSubjPort.LoadBalancerID) {
-							msg.AdditionalSubjectIDs = append(msg.AdditionalSubjectIDs, addSubjPort.LoadBalancerID)
-						}
-					}
-
-					addSubjOrigin, err := m.Client().Origin.Query().Where(origin.HasPoolWith(pool.IDEQ(objID))).Only(ctx)
-					if err == nil {
-						if !slices.Contains(msg.AdditionalSubjectIDs, addSubjOrigin.ID) && objID != addSubjOrigin.ID {
-							msg.AdditionalSubjectIDs = append(msg.AdditionalSubjectIDs, addSubjOrigin.ID)
-						}
-
-						if !slices.Contains(msg.AdditionalSubjectIDs, addSubjOrigin.PoolID) {
-							msg.AdditionalSubjectIDs = append(msg.AdditionalSubjectIDs, addSubjOrigin.PoolID)
-						}
-					}
-
-					lb_lookup := getLoadBalancerID(ctx, objID, msg.AdditionalSubjectIDs)
-					if lb_lookup != "" {
-						lb, err := m.Client().LoadBalancer.Get(ctx, lb_lookup)
+				if ok {
+					cv_updated_at = updated_at.Format(time.RFC3339)
+					pv_updated_at := ""
+					if !m.Op().Is(ent.OpCreate) {
+						ov, err := m.OldUpdatedAt(ctx)
 						if err != nil {
-							return nil, fmt.Errorf("unable to lookup location %s", lb_lookup)
-						}
-
-						if !slices.Contains(msg.AdditionalSubjectIDs, lb.LocationID) {
-							msg.AdditionalSubjectIDs = append(msg.AdditionalSubjectIDs, lb.LocationID)
+							pv_updated_at = "<unknown>"
+						} else {
+							pv_updated_at = ov.Format(time.RFC3339)
 						}
 					}
 
-					if len(relationships) != 0 {
-						if err := permissions.CreateAuthRelationships(ctx, "load-balancer-pool", objID, relationships...); err != nil {
-							return nil, fmt.Errorf("relationship request failed with error: %w", err)
-						}
-					}
-
-					if _, err := m.EventsPublisher.PublishChange(ctx, "load-balancer-pool", msg); err != nil {
-						return nil, fmt.Errorf("failed to publish change: %w", err)
-					}
-
-					return retValue, nil
-				})
-			},
-			ent.OpCreate|ent.OpUpdate|ent.OpUpdateOne,
-		),
-
-		// Delete Hook
-		hook.On(
-			func(next ent.Mutator) ent.Mutator {
-				return hook.PoolFunc(func(ctx context.Context, m *generated.PoolMutation) (ent.Value, error) {
-					additionalSubjects := []gidx.PrefixedID{}
-					relationships := []events.AuthRelationshipRelation{}
-
-					objID, ok := m.ID()
-					if !ok {
-						return nil, fmt.Errorf("object doesn't have an id %s", objID)
-					}
-
-					dbObj, err := m.Client().Pool.Get(ctx, objID)
-					if err != nil {
-						return nil, fmt.Errorf("failed to load object to get values for event, err %w", err)
-					}
-
-					additionalSubjects = append(additionalSubjects, dbObj.OwnerID)
-
-					relationships = append(relationships, events.AuthRelationshipRelation{
-						Relation:  "owner",
-						SubjectID: dbObj.OwnerID,
+					changeset = append(changeset, events.FieldChange{
+						Field:         "updated_at",
+						PreviousValue: pv_updated_at,
+						CurrentValue:  cv_updated_at,
 					})
+				}
 
-					// we have all the info we need, now complete the mutation before we process the event
-					retValue, err := next.Mutate(ctx, m)
-					if err != nil {
-						return retValue, err
-					}
+				cv_name := ""
+				name, ok := m.Name()
 
-					if len(relationships) != 0 {
-						if err := permissions.DeleteAuthRelationships(ctx, "load-balancer-pool", objID, relationships...); err != nil {
-							return nil, fmt.Errorf("relationship request failed with error: %w", err)
-						}
-					}
-
-					addSubjPort, err := m.Client().Port.Query().Where(port.HasPoolsWith(pool.IDEQ(objID))).Only(ctx)
-					if err == nil {
-						if !slices.Contains(additionalSubjects, addSubjPort.LoadBalancerID) {
-							additionalSubjects = append(additionalSubjects, addSubjPort.LoadBalancerID)
-						}
-					}
-
-					lb_lookup := getLoadBalancerID(ctx, objID, additionalSubjects)
-					if lb_lookup != "" {
-						lb, err := m.Client().LoadBalancer.Get(ctx, lb_lookup)
+				if ok {
+					cv_name = fmt.Sprintf("%s", fmt.Sprint(name))
+					pv_name := ""
+					if !m.Op().Is(ent.OpCreate) {
+						ov, err := m.OldName(ctx)
 						if err != nil {
-							return nil, fmt.Errorf("unable to lookup location %s", lb_lookup)
-						}
-
-						if !slices.Contains(additionalSubjects, lb.LocationID) {
-							additionalSubjects = append(additionalSubjects, lb.LocationID)
+							pv_name = "<unknown>"
+						} else {
+							pv_name = fmt.Sprintf("%s", fmt.Sprint(ov))
 						}
 					}
 
-					msg := events.ChangeMessage{
-						EventType:            eventType(m.Op()),
-						SubjectID:            objID,
-						AdditionalSubjectIDs: additionalSubjects,
-						Timestamp:            time.Now().UTC(),
+					changeset = append(changeset, events.FieldChange{
+						Field:         "name",
+						PreviousValue: pv_name,
+						CurrentValue:  cv_name,
+					})
+				}
+
+				cv_protocol := ""
+				protocol, ok := m.Protocol()
+
+				if ok {
+					cv_protocol = fmt.Sprintf("%s", fmt.Sprint(protocol))
+					pv_protocol := ""
+					if !m.Op().Is(ent.OpCreate) {
+						ov, err := m.OldProtocol(ctx)
+						if err != nil {
+							pv_protocol = "<unknown>"
+						} else {
+							pv_protocol = fmt.Sprintf("%s", fmt.Sprint(ov))
+						}
 					}
 
-					if _, err := m.EventsPublisher.PublishChange(ctx, "load-balancer-pool", msg); err != nil {
-						return nil, fmt.Errorf("failed to publish change: %w", err)
-					}
+					changeset = append(changeset, events.FieldChange{
+						Field:         "protocol",
+						PreviousValue: pv_protocol,
+						CurrentValue:  cv_protocol,
+					})
+				}
 
-					return retValue, nil
+				cv_owner_id := ""
+				owner_id, ok := m.OwnerID()
+				if !ok && !m.Op().Is(ent.OpCreate) {
+					// since we are doing an update or delete and these fields didn't change, load the "old" value
+					owner_id, err = m.OldOwnerID(ctx)
+					if err != nil {
+						return nil, err
+					}
+				}
+				additionalSubjects = append(additionalSubjects, owner_id)
+
+				relationships = append(relationships, events.AuthRelationshipRelation{
+					Relation:  "owner",
+					SubjectID: owner_id,
 				})
-			},
-			ent.OpDelete|ent.OpDeleteOne,
+
+				if ok {
+					cv_owner_id = fmt.Sprintf("%s", fmt.Sprint(owner_id))
+					pv_owner_id := ""
+					if !m.Op().Is(ent.OpCreate) {
+						ov, err := m.OldOwnerID(ctx)
+						if err != nil {
+							pv_owner_id = "<unknown>"
+						} else {
+							pv_owner_id = fmt.Sprintf("%s", fmt.Sprint(ov))
+						}
+					}
+
+					changeset = append(changeset, events.FieldChange{
+						Field:         "owner_id",
+						PreviousValue: pv_owner_id,
+						CurrentValue:  cv_owner_id,
+					})
+				}
+
+				msg := events.ChangeMessage{
+					EventType:            eventType(m.Op()),
+					SubjectID:            objID,
+					AdditionalSubjectIDs: additionalSubjects,
+					Timestamp:            time.Now().UTC(),
+					FieldChanges:         changeset,
+				}
+
+				// complete the mutation before we process the event
+				retValue, err := next.Mutate(ctx, m)
+				if err != nil {
+					return retValue, err
+				}
+
+				addSubjPort, err := m.Client().Port.Query().Where(port.HasPoolsWith(pool.IDEQ(objID))).Only(ctx)
+				if err == nil {
+					if !slices.Contains(msg.AdditionalSubjectIDs, addSubjPort.ID) && objID != addSubjPort.ID {
+						msg.AdditionalSubjectIDs = append(msg.AdditionalSubjectIDs, addSubjPort.ID)
+					}
+
+					if !slices.Contains(msg.AdditionalSubjectIDs, addSubjPort.LoadBalancerID) {
+						msg.AdditionalSubjectIDs = append(msg.AdditionalSubjectIDs, addSubjPort.LoadBalancerID)
+					}
+				}
+
+				addSubjOrigin, err := m.Client().Origin.Query().Where(origin.HasPoolWith(pool.IDEQ(objID))).Only(ctx)
+				if err == nil {
+					if !slices.Contains(msg.AdditionalSubjectIDs, addSubjOrigin.ID) && objID != addSubjOrigin.ID {
+						msg.AdditionalSubjectIDs = append(msg.AdditionalSubjectIDs, addSubjOrigin.ID)
+					}
+
+					if !slices.Contains(msg.AdditionalSubjectIDs, addSubjOrigin.PoolID) {
+						msg.AdditionalSubjectIDs = append(msg.AdditionalSubjectIDs, addSubjOrigin.PoolID)
+					}
+				}
+
+				lb_lookup := getLoadBalancerID(ctx, objID, msg.AdditionalSubjectIDs)
+				if lb_lookup != "" {
+					lb, err := m.Client().LoadBalancer.Get(ctx, lb_lookup)
+					if err != nil {
+						return nil, fmt.Errorf("unable to lookup location %s", lb_lookup)
+					}
+
+					if !slices.Contains(msg.AdditionalSubjectIDs, lb.LocationID) {
+						msg.AdditionalSubjectIDs = append(msg.AdditionalSubjectIDs, lb.LocationID)
+					}
+				}
+
+				if len(relationships) != 0 {
+					if err := permissions.CreateAuthRelationships(ctx, "load-balancer-pool", objID, relationships...); err != nil {
+						return nil, fmt.Errorf("relationship request failed with error: %w", err)
+					}
+				}
+
+				if _, err := m.EventsPublisher.PublishChange(ctx, "load-balancer-pool", msg); err != nil {
+					return nil, fmt.Errorf("failed to publish change: %w", err)
+				}
+
+				return retValue, nil
+			})
+		},
+		ent.OpCreate|ent.OpUpdate|ent.OpUpdateOne,
+	)
+
+	// Delete Hook
+	dhook := hook.On(
+		func(next ent.Mutator) ent.Mutator {
+			return hook.PoolFunc(func(ctx context.Context, m *generated.PoolMutation) (ent.Value, error) {
+				additionalSubjects := []gidx.PrefixedID{}
+				relationships := []events.AuthRelationshipRelation{}
+
+				objID, ok := m.ID()
+				if !ok {
+					return nil, fmt.Errorf("object doesn't have an id %s", objID)
+				}
+
+				dbObj, err := m.Client().Pool.Get(ctx, objID)
+				if err != nil {
+					return nil, fmt.Errorf("failed to load object to get values for event, err %w", err)
+				}
+
+				additionalSubjects = append(additionalSubjects, dbObj.OwnerID)
+
+				relationships = append(relationships, events.AuthRelationshipRelation{
+					Relation:  "owner",
+					SubjectID: dbObj.OwnerID,
+				})
+
+				// we have all the info we need, now complete the mutation before we process the event
+				retValue, err := next.Mutate(ctx, m)
+				if err != nil {
+					return retValue, err
+				}
+
+				if len(relationships) != 0 {
+					if err := permissions.DeleteAuthRelationships(ctx, "load-balancer-pool", objID, relationships...); err != nil {
+						return nil, fmt.Errorf("relationship request failed with error: %w", err)
+					}
+				}
+
+				addSubjPort, err := m.Client().Port.Query().Where(port.HasPoolsWith(pool.IDEQ(objID))).Only(ctx)
+				if err == nil {
+					if !slices.Contains(additionalSubjects, addSubjPort.LoadBalancerID) {
+						additionalSubjects = append(additionalSubjects, addSubjPort.LoadBalancerID)
+					}
+				}
+
+				lb_lookup := getLoadBalancerID(ctx, objID, additionalSubjects)
+				if lb_lookup != "" {
+					lb, err := m.Client().LoadBalancer.Get(ctx, lb_lookup)
+					if err != nil {
+						return nil, fmt.Errorf("unable to lookup location %s", lb_lookup)
+					}
+
+					if !slices.Contains(additionalSubjects, lb.LocationID) {
+						additionalSubjects = append(additionalSubjects, lb.LocationID)
+					}
+				}
+
+				msg := events.ChangeMessage{
+					// EventType:            eventType(m.Op()),
+					EventType:            "delete",
+					SubjectID:            objID,
+					AdditionalSubjectIDs: additionalSubjects,
+					Timestamp:            time.Now().UTC(),
+				}
+
+				if _, err := m.EventsPublisher.PublishChange(ctx, "load-balancer-pool", msg); err != nil {
+					return nil, fmt.Errorf("failed to publish change: %w", err)
+				}
+
+				return retValue, nil
+			})
+		},
+		ent.OpDelete|ent.OpDeleteOne,
+	)
+
+	cuhook = hook.If(
+		cuhook,
+		hook.Not(
+			hook.And(
+				hook.Or(
+					hook.HasOp(ent.OpUpdate),
+					hook.HasOp(ent.OpUpdateOne),
+				),
+				hook.HasFields("deleted_at"),
+			),
 		),
-	}
+	)
+
+	return []ent.Hook{cuhook, dhook}
 }
 
 func PortHooks() []ent.Hook {
@@ -1008,7 +1022,7 @@ func PortHooks() []ent.Hook {
 					}
 
 					msg := events.ChangeMessage{
-						EventType:            eventType(m.Op()),
+						EventType:            "delete",
 						SubjectID:            objID,
 						AdditionalSubjectIDs: additionalSubjects,
 						Timestamp:            time.Now().UTC(),

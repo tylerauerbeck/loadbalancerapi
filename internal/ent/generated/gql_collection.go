@@ -489,6 +489,11 @@ func (po *PoolQuery) collectField(ctx context.Context, opCtx *graphql.OperationC
 				selectedFields = append(selectedFields, pool.FieldUpdatedAt)
 				fieldSeen[pool.FieldUpdatedAt] = struct{}{}
 			}
+		case "deletedAt":
+			if _, ok := fieldSeen[pool.FieldDeletedAt]; !ok {
+				selectedFields = append(selectedFields, pool.FieldDeletedAt)
+				fieldSeen[pool.FieldDeletedAt] = struct{}{}
+			}
 		case "name":
 			if _, ok := fieldSeen[pool.FieldName]; !ok {
 				selectedFields = append(selectedFields, pool.FieldName)

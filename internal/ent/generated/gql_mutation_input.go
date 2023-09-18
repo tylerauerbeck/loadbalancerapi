@@ -17,6 +17,8 @@
 package generated
 
 import (
+	"time"
+
 	"go.infratographer.com/load-balancer-api/internal/ent/generated/pool"
 	"go.infratographer.com/x/gidx"
 )
@@ -147,6 +149,7 @@ func (c *OriginUpdateOne) SetInput(i UpdateLoadBalancerOriginInput) *OriginUpdat
 
 // CreateLoadBalancerPoolInput represents a mutation input for creating loadbalancerpools.
 type CreateLoadBalancerPoolInput struct {
+	DeletedAt *time.Time
 	Name      string
 	Protocol  pool.Protocol
 	OwnerID   gidx.PrefixedID
@@ -156,6 +159,9 @@ type CreateLoadBalancerPoolInput struct {
 
 // Mutate applies the CreateLoadBalancerPoolInput on the PoolMutation builder.
 func (i *CreateLoadBalancerPoolInput) Mutate(m *PoolMutation) {
+	if v := i.DeletedAt; v != nil {
+		m.SetDeletedAt(*v)
+	}
 	m.SetName(i.Name)
 	m.SetProtocol(i.Protocol)
 	m.SetOwnerID(i.OwnerID)
@@ -175,6 +181,8 @@ func (c *PoolCreate) SetInput(i CreateLoadBalancerPoolInput) *PoolCreate {
 
 // UpdateLoadBalancerPoolInput represents a mutation input for updating loadbalancerpools.
 type UpdateLoadBalancerPoolInput struct {
+	ClearDeletedAt  bool
+	DeletedAt       *time.Time
 	Name            *string
 	Protocol        *pool.Protocol
 	ClearPorts      bool
@@ -187,6 +195,12 @@ type UpdateLoadBalancerPoolInput struct {
 
 // Mutate applies the UpdateLoadBalancerPoolInput on the PoolMutation builder.
 func (i *UpdateLoadBalancerPoolInput) Mutate(m *PoolMutation) {
+	if i.ClearDeletedAt {
+		m.ClearDeletedAt()
+	}
+	if v := i.DeletedAt; v != nil {
+		m.SetDeletedAt(*v)
+	}
 	if v := i.Name; v != nil {
 		m.SetName(*v)
 	}

@@ -663,12 +663,14 @@ func (c *PoolClient) QueryOrigins(po *Pool) *OriginQuery {
 
 // Hooks returns the client hooks.
 func (c *PoolClient) Hooks() []Hook {
-	return c.hooks.Pool
+	hooks := c.hooks.Pool
+	return append(hooks[:len(hooks):len(hooks)], pool.Hooks[:]...)
 }
 
 // Interceptors returns the client interceptors.
 func (c *PoolClient) Interceptors() []Interceptor {
-	return c.inters.Pool
+	inters := c.inters.Pool
+	return append(inters[:len(inters):len(inters)], pool.Interceptors[:]...)
 }
 
 func (c *PoolClient) mutate(ctx context.Context, m *PoolMutation) (Value, error) {

@@ -19,6 +19,7 @@ func main() {
 		entx.WithFederation(),
 		// entx.WithEventHooks(), // TODO: untangle additional subjects coupled to auth relationship
 		entx.WithJSONScalar(),
+		entx.WithSoftDeletes(),
 	)
 	if err != nil {
 		log.Fatalf("creating entx extension: %v", err)
