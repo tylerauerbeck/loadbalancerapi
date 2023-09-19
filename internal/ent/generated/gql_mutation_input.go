@@ -25,6 +25,7 @@ import (
 
 // CreateLoadBalancerInput represents a mutation input for creating loadbalancers.
 type CreateLoadBalancerInput struct {
+	DeletedAt  *time.Time
 	Name       string
 	OwnerID    gidx.PrefixedID
 	LocationID gidx.PrefixedID
@@ -34,6 +35,9 @@ type CreateLoadBalancerInput struct {
 
 // Mutate applies the CreateLoadBalancerInput on the LoadBalancerMutation builder.
 func (i *CreateLoadBalancerInput) Mutate(m *LoadBalancerMutation) {
+	if v := i.DeletedAt; v != nil {
+		m.SetDeletedAt(*v)
+	}
 	m.SetName(i.Name)
 	m.SetOwnerID(i.OwnerID)
 	m.SetLocationID(i.LocationID)
@@ -51,14 +55,22 @@ func (c *LoadBalancerCreate) SetInput(i CreateLoadBalancerInput) *LoadBalancerCr
 
 // UpdateLoadBalancerInput represents a mutation input for updating loadbalancers.
 type UpdateLoadBalancerInput struct {
-	Name          *string
-	ClearPorts    bool
-	AddPortIDs    []gidx.PrefixedID
-	RemovePortIDs []gidx.PrefixedID
+	ClearDeletedAt bool
+	DeletedAt      *time.Time
+	Name           *string
+	ClearPorts     bool
+	AddPortIDs     []gidx.PrefixedID
+	RemovePortIDs  []gidx.PrefixedID
 }
 
 // Mutate applies the UpdateLoadBalancerInput on the LoadBalancerMutation builder.
 func (i *UpdateLoadBalancerInput) Mutate(m *LoadBalancerMutation) {
+	if i.ClearDeletedAt {
+		m.ClearDeletedAt()
+	}
+	if v := i.DeletedAt; v != nil {
+		m.SetDeletedAt(*v)
+	}
 	if v := i.Name; v != nil {
 		m.SetName(*v)
 	}

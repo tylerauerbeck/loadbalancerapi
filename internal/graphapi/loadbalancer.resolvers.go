@@ -7,6 +7,7 @@ package graphapi
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"go.infratographer.com/load-balancer-api/internal/ent/generated"
 	"go.infratographer.com/load-balancer-api/internal/ent/generated/port"
@@ -40,12 +41,16 @@ func (r *mutationResolver) LoadBalancerUpdate(ctx context.Context, id gidx.Prefi
 		return nil, err
 	}
 
-	lb, err = lb.Update().SetInput(input).Save(ctx)
-	if err != nil {
-		return nil, err
+	if lb.DeletedAt.IsZero() {
+		lb, err = lb.Update().SetInput(input).Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		return &LoadBalancerUpdatePayload{LoadBalancer: lb}, nil
 	}
 
-	return &LoadBalancerUpdatePayload{LoadBalancer: lb}, nil
+	return nil, fmt.Errorf("loadbalancer %s not found", id.String())
 }
 
 // LoadBalancerDelete is the resolver for the loadBalancerDelete field.
@@ -54,49 +59,59 @@ func (r *mutationResolver) LoadBalancerDelete(ctx context.Context, id gidx.Prefi
 		return nil, err
 	}
 
-	tx, err := r.client.BeginTx(ctx, &sql.TxOptions{})
+	lb, err := r.client.LoadBalancer.Get(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	// cleanup ports associated with loadbalancer
-	ports, err := tx.Port.Query().Where(predicate.Port(port.LoadBalancerIDEQ(id))).All(ctx)
-	if err != nil {
-		r.logger.Errorw("failed to query ports", "error", err)
-		if rerr := tx.Rollback(); rerr != nil {
-			r.logger.Errorw("failed to rollback transaction", "error", rerr, "stage", "query ports")
+	if lb.DeletedAt.IsZero() {
+
+		tx, err := r.client.BeginTx(ctx, &sql.TxOptions{})
+		if err != nil {
+			return nil, err
 		}
-		return nil, err
-	}
 
-	for _, p := range ports {
-		if err = tx.Port.DeleteOne(p).Exec(ctx); err != nil {
-			r.logger.Errorw("failed to delete port", "port", p.ID, "error", err)
+		// cleanup ports associated with loadbalancer
+		ports, err := tx.Port.Query().Where(predicate.Port(port.LoadBalancerIDEQ(id))).All(ctx)
+		if err != nil {
+			r.logger.Errorw("failed to query ports", "error", err)
 			if rerr := tx.Rollback(); rerr != nil {
-				r.logger.Errorw("failed to rollback transaction", "error", rerr, "stage", "delete port")
+				r.logger.Errorw("failed to rollback transaction", "error", rerr, "stage", "query ports")
 			}
 			return nil, err
 		}
-	}
 
-	// delete loadbalancer
-	if err = tx.LoadBalancer.DeleteOneID(id).Exec(ctx); err != nil {
-		r.logger.Errorw("failed to delete loadbalancer", "loadbalancer", id.String(), "error", err)
-		if rerr := tx.Rollback(); rerr != nil {
-			r.logger.Errorw("failed to rollback transaction", "error", rerr, "stage", "delete loadbalancer")
+		for _, p := range ports {
+			if err = tx.Port.DeleteOne(p).Exec(ctx); err != nil {
+				r.logger.Errorw("failed to delete port", "port", p.ID, "error", err)
+				if rerr := tx.Rollback(); rerr != nil {
+					r.logger.Errorw("failed to rollback transaction", "error", rerr, "stage", "delete port")
+				}
+				return nil, err
+			}
 		}
-		return nil, err
-	}
 
-	if err = tx.Commit(); err != nil {
-		r.logger.Errorw("failed to commit transaction", "error", err)
-		if rerr := tx.Rollback(); rerr != nil {
-			r.logger.Errorw("failed to rollback transaction", "error", rerr, "stage", "commit transaction")
+		// delete loadbalancer
+		if err = tx.LoadBalancer.DeleteOneID(id).Exec(ctx); err != nil {
+			r.logger.Errorw("failed to delete loadbalancer", "loadbalancer", id.String(), "error", err)
+			if rerr := tx.Rollback(); rerr != nil {
+				r.logger.Errorw("failed to rollback transaction", "error", rerr, "stage", "delete loadbalancer")
+			}
+			return nil, err
 		}
-		return nil, err
+
+		if err = tx.Commit(); err != nil {
+			r.logger.Errorw("failed to commit transaction", "error", err)
+			if rerr := tx.Rollback(); rerr != nil {
+				r.logger.Errorw("failed to rollback transaction", "error", rerr, "stage", "commit transaction")
+			}
+			return nil, err
+		}
+
+		return &LoadBalancerDeletePayload{DeletedID: id}, nil
 	}
 
-	return &LoadBalancerDeletePayload{DeletedID: id}, nil
+	return nil, fmt.Errorf("loadbalancer %s not found", id.String())
 }
 
 // LoadBalancer is the resolver for the loadBalancer field.

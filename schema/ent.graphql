@@ -2,6 +2,7 @@ directive @goField(forceResolver: Boolean, name: String) on FIELD_DEFINITION | I
 directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
 """Input information to create a load balancer."""
 input CreateLoadBalancerInput {
+  deletedAt: Time
   """The name of the load balancer."""
   name: String!
   """The ID for the owner for this load balancer."""
@@ -64,6 +65,7 @@ type LoadBalancer implements Node & IPAddressable & MetadataNode @key(fields: "i
   id: ID!
   createdAt: Time!
   updatedAt: Time!
+  deletedAt: Time
   """The name of the load balancer."""
   name: String!
   ports(
@@ -640,6 +642,17 @@ input LoadBalancerWhereInput {
   updatedAtGTE: Time
   updatedAtLT: Time
   updatedAtLTE: Time
+  """deleted_at field predicates"""
+  deletedAt: Time
+  deletedAtNEQ: Time
+  deletedAtIn: [Time!]
+  deletedAtNotIn: [Time!]
+  deletedAtGT: Time
+  deletedAtGTE: Time
+  deletedAtLT: Time
+  deletedAtLTE: Time
+  deletedAtIsNil: Boolean
+  deletedAtNotNil: Boolean
   """name field predicates"""
   name: String
   nameNEQ: String
@@ -715,6 +728,8 @@ type Query {
 scalar Time
 """Input information to update a load balancer."""
 input UpdateLoadBalancerInput {
+  deletedAt: Time
+  clearDeletedAt: Boolean
   """The name of the load balancer."""
   name: String
   addPortIDs: [ID!]

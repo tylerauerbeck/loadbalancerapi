@@ -65,6 +65,20 @@ func (lbc *LoadBalancerCreate) SetNillableUpdatedAt(t *time.Time) *LoadBalancerC
 	return lbc
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (lbc *LoadBalancerCreate) SetDeletedAt(t time.Time) *LoadBalancerCreate {
+	lbc.mutation.SetDeletedAt(t)
+	return lbc
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (lbc *LoadBalancerCreate) SetNillableDeletedAt(t *time.Time) *LoadBalancerCreate {
+	if t != nil {
+		lbc.SetDeletedAt(*t)
+	}
+	return lbc
+}
+
 // SetName sets the "name" field.
 func (lbc *LoadBalancerCreate) SetName(s string) *LoadBalancerCreate {
 	lbc.mutation.SetName(s)
@@ -130,7 +144,9 @@ func (lbc *LoadBalancerCreate) Mutation() *LoadBalancerMutation {
 
 // Save creates the LoadBalancer in the database.
 func (lbc *LoadBalancerCreate) Save(ctx context.Context) (*LoadBalancer, error) {
-	lbc.defaults()
+	if err := lbc.defaults(); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, lbc.sqlSave, lbc.mutation, lbc.hooks)
 }
 
@@ -157,19 +173,29 @@ func (lbc *LoadBalancerCreate) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (lbc *LoadBalancerCreate) defaults() {
+func (lbc *LoadBalancerCreate) defaults() error {
 	if _, ok := lbc.mutation.CreatedAt(); !ok {
+		if loadbalancer.DefaultCreatedAt == nil {
+			return fmt.Errorf("generated: uninitialized loadbalancer.DefaultCreatedAt (forgotten import generated/runtime?)")
+		}
 		v := loadbalancer.DefaultCreatedAt()
 		lbc.mutation.SetCreatedAt(v)
 	}
 	if _, ok := lbc.mutation.UpdatedAt(); !ok {
+		if loadbalancer.DefaultUpdatedAt == nil {
+			return fmt.Errorf("generated: uninitialized loadbalancer.DefaultUpdatedAt (forgotten import generated/runtime?)")
+		}
 		v := loadbalancer.DefaultUpdatedAt()
 		lbc.mutation.SetUpdatedAt(v)
 	}
 	if _, ok := lbc.mutation.ID(); !ok {
+		if loadbalancer.DefaultID == nil {
+			return fmt.Errorf("generated: uninitialized loadbalancer.DefaultID (forgotten import generated/runtime?)")
+		}
 		v := loadbalancer.DefaultID()
 		lbc.mutation.SetID(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -257,6 +283,10 @@ func (lbc *LoadBalancerCreate) createSpec() (*LoadBalancer, *sqlgraph.CreateSpec
 	if value, ok := lbc.mutation.UpdatedAt(); ok {
 		_spec.SetField(loadbalancer.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
+	}
+	if value, ok := lbc.mutation.DeletedAt(); ok {
+		_spec.SetField(loadbalancer.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = value
 	}
 	if value, ok := lbc.mutation.Name(); ok {
 		_spec.SetField(loadbalancer.FieldName, field.TypeString, value)

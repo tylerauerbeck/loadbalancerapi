@@ -27,6 +27,7 @@ var (
 		{Name: "id", Type: field.TypeString, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "name", Type: field.TypeString, Size: 2147483647},
 		{Name: "owner_id", Type: field.TypeString},
 		{Name: "location_id", Type: field.TypeString},
@@ -40,7 +41,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "load_balancers_providers_provider",
-				Columns:    []*schema.Column{LoadBalancersColumns[6]},
+				Columns:    []*schema.Column{LoadBalancersColumns[7]},
 				RefColumns: []*schema.Column{ProvidersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -59,17 +60,17 @@ var (
 			{
 				Name:    "loadbalancer_provider_id",
 				Unique:  false,
-				Columns: []*schema.Column{LoadBalancersColumns[6]},
+				Columns: []*schema.Column{LoadBalancersColumns[7]},
 			},
 			{
 				Name:    "loadbalancer_location_id",
 				Unique:  false,
-				Columns: []*schema.Column{LoadBalancersColumns[5]},
+				Columns: []*schema.Column{LoadBalancersColumns[6]},
 			},
 			{
 				Name:    "loadbalancer_owner_id",
 				Unique:  false,
-				Columns: []*schema.Column{LoadBalancersColumns[4]},
+				Columns: []*schema.Column{LoadBalancersColumns[5]},
 			},
 		},
 	}

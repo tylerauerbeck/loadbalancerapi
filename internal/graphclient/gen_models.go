@@ -35,6 +35,7 @@ type Entity interface {
 
 // Input information to create a load balancer.
 type CreateLoadBalancerInput struct {
+	DeletedAt *time.Time `json:"deletedAt,omitempty"`
 	// The name of the load balancer.
 	Name string `json:"name"`
 	// The ID for the owner for this load balancer.
@@ -89,6 +90,7 @@ type LoadBalancer struct {
 	ID        gidx.PrefixedID `json:"id"`
 	CreatedAt time.Time       `json:"createdAt"`
 	UpdatedAt time.Time       `json:"updatedAt"`
+	DeletedAt *time.Time      `json:"deletedAt,omitempty"`
 	// The name of the load balancer.
 	Name  string                     `json:"name"`
 	Ports LoadBalancerPortConnection `json:"ports"`
@@ -718,6 +720,17 @@ type LoadBalancerWhereInput struct {
 	UpdatedAtGte   *time.Time   `json:"updatedAtGTE,omitempty"`
 	UpdatedAtLt    *time.Time   `json:"updatedAtLT,omitempty"`
 	UpdatedAtLte   *time.Time   `json:"updatedAtLTE,omitempty"`
+	// deleted_at field predicates
+	DeletedAt       *time.Time   `json:"deletedAt,omitempty"`
+	DeletedAtNeq    *time.Time   `json:"deletedAtNEQ,omitempty"`
+	DeletedAtIn     []*time.Time `json:"deletedAtIn,omitempty"`
+	DeletedAtNotIn  []*time.Time `json:"deletedAtNotIn,omitempty"`
+	DeletedAtGt     *time.Time   `json:"deletedAtGT,omitempty"`
+	DeletedAtGte    *time.Time   `json:"deletedAtGTE,omitempty"`
+	DeletedAtLt     *time.Time   `json:"deletedAtLT,omitempty"`
+	DeletedAtLte    *time.Time   `json:"deletedAtLTE,omitempty"`
+	DeletedAtIsNil  *bool        `json:"deletedAtIsNil,omitempty"`
+	DeletedAtNotNil *bool        `json:"deletedAtNotNil,omitempty"`
 	// name field predicates
 	Name             *string  `json:"name,omitempty"`
 	NameNeq          *string  `json:"nameNEQ,omitempty"`
@@ -771,6 +784,8 @@ func (ResourceOwner) IsEntity() {}
 
 // Input information to update a load balancer.
 type UpdateLoadBalancerInput struct {
+	DeletedAt      *time.Time `json:"deletedAt,omitempty"`
+	ClearDeletedAt *bool      `json:"clearDeletedAt,omitempty"`
 	// The name of the load balancer.
 	Name          *string           `json:"name,omitempty"`
 	AddPortIDs    []gidx.PrefixedID `json:"addPortIDs,omitempty"`
