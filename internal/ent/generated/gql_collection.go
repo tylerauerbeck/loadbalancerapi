@@ -274,6 +274,11 @@ func (o *OriginQuery) collectField(ctx context.Context, opCtx *graphql.Operation
 				selectedFields = append(selectedFields, origin.FieldUpdatedAt)
 				fieldSeen[origin.FieldUpdatedAt] = struct{}{}
 			}
+		case "deletedAt":
+			if _, ok := fieldSeen[origin.FieldDeletedAt]; !ok {
+				selectedFields = append(selectedFields, origin.FieldDeletedAt)
+				fieldSeen[origin.FieldDeletedAt] = struct{}{}
+			}
 		case "name":
 			if _, ok := fieldSeen[origin.FieldName]; !ok {
 				selectedFields = append(selectedFields, origin.FieldName)

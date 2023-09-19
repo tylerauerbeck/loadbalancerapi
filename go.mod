@@ -2,7 +2,7 @@ module go.infratographer.com/load-balancer-api
 
 go 1.20
 
-replace go.infratographer.com/x => /Users/tylerauerbeck/go/src/github.com/infratographer/x
+replace go.infratographer.com/x => /Users/tauerbeck/go/src/github.com/infratographer/x
 
 require (
 	entgo.io/contrib v0.4.5

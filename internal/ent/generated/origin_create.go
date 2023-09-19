@@ -64,6 +64,20 @@ func (oc *OriginCreate) SetNillableUpdatedAt(t *time.Time) *OriginCreate {
 	return oc
 }
 
+// SetDeletedAt sets the "deleted_at" field.
+func (oc *OriginCreate) SetDeletedAt(t time.Time) *OriginCreate {
+	oc.mutation.SetDeletedAt(t)
+	return oc
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (oc *OriginCreate) SetNillableDeletedAt(t *time.Time) *OriginCreate {
+	if t != nil {
+		oc.SetDeletedAt(*t)
+	}
+	return oc
+}
+
 // SetName sets the "name" field.
 func (oc *OriginCreate) SetName(s string) *OriginCreate {
 	oc.mutation.SetName(s)
@@ -128,7 +142,9 @@ func (oc *OriginCreate) Mutation() *OriginMutation {
 
 // Save creates the Origin in the database.
 func (oc *OriginCreate) Save(ctx context.Context) (*Origin, error) {
-	oc.defaults()
+	if err := oc.defaults(); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, oc.sqlSave, oc.mutation, oc.hooks)
 }
 
@@ -155,12 +171,18 @@ func (oc *OriginCreate) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (oc *OriginCreate) defaults() {
+func (oc *OriginCreate) defaults() error {
 	if _, ok := oc.mutation.CreatedAt(); !ok {
+		if origin.DefaultCreatedAt == nil {
+			return fmt.Errorf("generated: uninitialized origin.DefaultCreatedAt (forgotten import generated/runtime?)")
+		}
 		v := origin.DefaultCreatedAt()
 		oc.mutation.SetCreatedAt(v)
 	}
 	if _, ok := oc.mutation.UpdatedAt(); !ok {
+		if origin.DefaultUpdatedAt == nil {
+			return fmt.Errorf("generated: uninitialized origin.DefaultUpdatedAt (forgotten import generated/runtime?)")
+		}
 		v := origin.DefaultUpdatedAt()
 		oc.mutation.SetUpdatedAt(v)
 	}
@@ -169,9 +191,13 @@ func (oc *OriginCreate) defaults() {
 		oc.mutation.SetActive(v)
 	}
 	if _, ok := oc.mutation.ID(); !ok {
+		if origin.DefaultID == nil {
+			return fmt.Errorf("generated: uninitialized origin.DefaultID (forgotten import generated/runtime?)")
+		}
 		v := origin.DefaultID()
 		oc.mutation.SetID(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -262,6 +288,10 @@ func (oc *OriginCreate) createSpec() (*Origin, *sqlgraph.CreateSpec) {
 	if value, ok := oc.mutation.UpdatedAt(); ok {
 		_spec.SetField(origin.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
+	}
+	if value, ok := oc.mutation.DeletedAt(); ok {
+		_spec.SetField(origin.FieldDeletedAt, field.TypeTime, value)
+		_node.DeletedAt = value
 	}
 	if value, ok := oc.mutation.Name(); ok {
 		_spec.SetField(origin.FieldName, field.TypeString, value)

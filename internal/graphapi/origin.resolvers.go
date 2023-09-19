@@ -6,6 +6,7 @@ package graphapi
 
 import (
 	"context"
+	"fmt"
 
 	"go.infratographer.com/load-balancer-api/internal/ent/generated"
 	"go.infratographer.com/permissions-api/pkg/permissions"
@@ -43,9 +44,13 @@ func (r *mutationResolver) LoadBalancerOriginUpdate(ctx context.Context, id gidx
 		return nil, err
 	}
 
-	origin, err = origin.Update().SetInput(input).Save(ctx)
-	if err != nil {
-		return nil, err
+	if origin.DeletedAt.IsZero() {
+		origin, err = origin.Update().SetInput(input).Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, fmt.Errorf("origin %s not found", id)
 	}
 
 	return &LoadBalancerOriginUpdatePayload{LoadBalancerOrigin: origin}, nil
@@ -62,8 +67,12 @@ func (r *mutationResolver) LoadBalancerOriginDelete(ctx context.Context, id gidx
 		return nil, err
 	}
 
-	if err := r.client.Origin.DeleteOneID(id).Exec(ctx); err != nil {
-		return nil, err
+	if origin.DeletedAt.IsZero() {
+		if err := r.client.Origin.DeleteOneID(id).Exec(ctx); err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, fmt.Errorf("origin %s not found", id)
 	}
 
 	return &LoadBalancerOriginDeletePayload{DeletedID: id}, nil

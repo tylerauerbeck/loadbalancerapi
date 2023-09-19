@@ -513,12 +513,14 @@ func (c *OriginClient) QueryPool(o *Origin) *PoolQuery {
 
 // Hooks returns the client hooks.
 func (c *OriginClient) Hooks() []Hook {
-	return c.hooks.Origin
+	hooks := c.hooks.Origin
+	return append(hooks[:len(hooks):len(hooks)], origin.Hooks[:]...)
 }
 
 // Interceptors returns the client interceptors.
 func (c *OriginClient) Interceptors() []Interceptor {
-	return c.inters.Origin
+	inters := c.inters.Origin
+	return append(inters[:len(inters):len(inters)], origin.Interceptors[:]...)
 }
 
 func (c *OriginClient) mutate(ctx context.Context, m *OriginMutation) (Value, error) {

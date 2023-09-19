@@ -78,6 +78,7 @@ var (
 		{Name: "id", Type: field.TypeString, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "target", Type: field.TypeString},
 		{Name: "port_number", Type: field.TypeInt},
@@ -92,7 +93,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "origins_pools_pool",
-				Columns:    []*schema.Column{OriginsColumns[7]},
+				Columns:    []*schema.Column{OriginsColumns[8]},
 				RefColumns: []*schema.Column{PoolsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -111,7 +112,7 @@ var (
 			{
 				Name:    "origin_pool_id",
 				Unique:  false,
-				Columns: []*schema.Column{OriginsColumns[7]},
+				Columns: []*schema.Column{OriginsColumns[8]},
 			},
 		},
 	}

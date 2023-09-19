@@ -87,6 +87,7 @@ func (c *LoadBalancerUpdateOne) SetInput(i UpdateLoadBalancerInput) *LoadBalance
 
 // CreateLoadBalancerOriginInput represents a mutation input for creating loadbalancerorigins.
 type CreateLoadBalancerOriginInput struct {
+	DeletedAt  *time.Time
 	Name       string
 	Target     string
 	PortNumber int
@@ -96,6 +97,9 @@ type CreateLoadBalancerOriginInput struct {
 
 // Mutate applies the CreateLoadBalancerOriginInput on the OriginMutation builder.
 func (i *CreateLoadBalancerOriginInput) Mutate(m *OriginMutation) {
+	if v := i.DeletedAt; v != nil {
+		m.SetDeletedAt(*v)
+	}
 	m.SetName(i.Name)
 	m.SetTarget(i.Target)
 	m.SetPortNumber(i.PortNumber)
@@ -113,14 +117,22 @@ func (c *OriginCreate) SetInput(i CreateLoadBalancerOriginInput) *OriginCreate {
 
 // UpdateLoadBalancerOriginInput represents a mutation input for updating loadbalancerorigins.
 type UpdateLoadBalancerOriginInput struct {
-	Name       *string
-	Target     *string
-	PortNumber *int
-	Active     *bool
+	ClearDeletedAt bool
+	DeletedAt      *time.Time
+	Name           *string
+	Target         *string
+	PortNumber     *int
+	Active         *bool
 }
 
 // Mutate applies the UpdateLoadBalancerOriginInput on the OriginMutation builder.
 func (i *UpdateLoadBalancerOriginInput) Mutate(m *OriginMutation) {
+	if i.ClearDeletedAt {
+		m.ClearDeletedAt()
+	}
+	if v := i.DeletedAt; v != nil {
+		m.SetDeletedAt(*v)
+	}
 	if v := i.Name; v != nil {
 		m.SetName(*v)
 	}

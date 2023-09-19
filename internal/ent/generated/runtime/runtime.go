@@ -68,6 +68,10 @@ func init() {
 	// loadbalancer.DefaultID holds the default value on creation for the id field.
 	loadbalancer.DefaultID = loadbalancerDescID.Default.(func() gidx.PrefixedID)
 	originMixin := schema.Origin{}.Mixin()
+	originMixinHooks1 := originMixin[1].Hooks()
+	origin.Hooks[0] = originMixinHooks1[0]
+	originMixinInters1 := originMixin[1].Interceptors()
+	origin.Interceptors[0] = originMixinInters1[0]
 	originMixinFields0 := originMixin[0].Fields()
 	_ = originMixinFields0
 	originFields := schema.Origin{}.Fields()

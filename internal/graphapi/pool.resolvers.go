@@ -42,9 +42,13 @@ func (r *mutationResolver) LoadBalancerPoolUpdate(ctx context.Context, id gidx.P
 		return nil, err
 	}
 
-	pool, err = pool.Update().SetInput(input).Save(ctx)
-	if err != nil {
-		return nil, err
+	if pool.DeletedAt.IsZero() {
+		pool, err = pool.Update().SetInput(input).Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, fmt.Errorf("pool %s not found", id)
 	}
 
 	return &LoadBalancerPoolUpdatePayload{LoadBalancerPool: pool}, nil
@@ -56,53 +60,57 @@ func (r *mutationResolver) LoadBalancerPoolDelete(ctx context.Context, id gidx.P
 		return nil, err
 	}
 
-	// TODO: return the requestID echo generates or we could use the root trace id
-	var (
-		err error
-		tx  *generated.Tx
-	)
-
-	tx, err = r.client.BeginTx(ctx, &sql.TxOptions{})
+	pool, err := r.client.Pool.Get(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	// todo: cleanup pool assigments
+	if pool.DeletedAt.IsZero() {
 
-	// cleanup origins associated with pool
-	origins, err := tx.Origin.Query().Where(predicate.Origin(origin.PoolIDEQ(id))).All(ctx)
-	if err != nil {
-		if rerr := tx.Rollback(); rerr != nil {
-			log.Error(fmt.Errorf("%w: %v", err, rerr).Error())
+		tx, err := r.client.BeginTx(ctx, &sql.TxOptions{})
+		if err != nil {
+			return nil, err
 		}
-		return nil, err
-	}
 
-	for _, o := range origins {
-		if err = tx.Origin.DeleteOne(o).Exec(ctx); err != nil {
+		// todo: cleanup pool assigments
+
+		// cleanup origins associated with pool
+		origins, err := tx.Origin.Query().Where(predicate.Origin(origin.PoolIDEQ(id))).All(ctx)
+		if err != nil {
 			if rerr := tx.Rollback(); rerr != nil {
 				log.Error(fmt.Errorf("%w: %v", err, rerr).Error())
 			}
 			return nil, err
 		}
-	}
 
-	// delete pool
-	if err = tx.Pool.DeleteOneID(id).Exec(ctx); err != nil {
-		if rerr := tx.Rollback(); rerr != nil {
-			log.Error(fmt.Errorf("%w: %v", err, rerr).Error())
+		for _, o := range origins {
+			if err = tx.Origin.DeleteOne(o).Exec(ctx); err != nil {
+				if rerr := tx.Rollback(); rerr != nil {
+					log.Error(fmt.Errorf("%w: %v", err, rerr).Error())
+				}
+				return nil, err
+			}
 		}
-		return nil, err
-	}
 
-	if err = tx.Commit(); err != nil {
-		if rerr := tx.Rollback(); rerr != nil {
-			log.Error(fmt.Errorf("%w: %v", err, rerr).Error())
+		// delete pool
+		if err = tx.Pool.DeleteOneID(id).Exec(ctx); err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				log.Error(fmt.Errorf("%w: %v", err, rerr).Error())
+			}
+			return nil, err
 		}
-		return nil, err
+
+		if err = tx.Commit(); err != nil {
+			if rerr := tx.Rollback(); rerr != nil {
+				log.Error(fmt.Errorf("%w: %v", err, rerr).Error())
+			}
+			return nil, err
+		}
+
+		return &LoadBalancerPoolDeletePayload{DeletedID: &id}, nil
 	}
 
-	return &LoadBalancerPoolDeletePayload{DeletedID: &id}, nil
+	return nil, fmt.Errorf("pool %s not found", id)
 }
 
 // LoadBalancerPool is the resolver for the loadBalancerPool field.
