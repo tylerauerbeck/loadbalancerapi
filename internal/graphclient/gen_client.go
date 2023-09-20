@@ -81,18 +81,28 @@ type GetLoadBalancer struct {
 		Owner struct {
 			ID gidx.PrefixedID "json:\"id\" graphql:\"id\""
 		} "json:\"owner\" graphql:\"owner\""
-		CreatedAt time.Time "json:\"createdAt\" graphql:\"createdAt\""
-		UpdatedAt time.Time "json:\"updatedAt\" graphql:\"updatedAt\""
+		CreatedAt time.Time  "json:\"createdAt\" graphql:\"createdAt\""
+		UpdatedAt time.Time  "json:\"updatedAt\" graphql:\"updatedAt\""
+		DeletedAt *time.Time "json:\"deletedAt\" graphql:\"deletedAt\""
 	} "json:\"loadBalancer\" graphql:\"loadBalancer\""
 }
 type GetLoadBalancerPool struct {
 	LoadBalancerPool struct {
-		ID        gidx.PrefixedID          "json:\"id\" graphql:\"id\""
-		Name      string                   "json:\"name\" graphql:\"name\""
+		ID      gidx.PrefixedID "json:\"id\" graphql:\"id\""
+		Name    string          "json:\"name\" graphql:\"name\""
+		Origins struct {
+			Edges []*struct {
+				Node *struct {
+					ID        gidx.PrefixedID "json:\"id\" graphql:\"id\""
+					DeletedAt *time.Time      "json:\"deletedAt\" graphql:\"deletedAt\""
+				} "json:\"node\" graphql:\"node\""
+			} "json:\"edges\" graphql:\"edges\""
+		} "json:\"origins\" graphql:\"origins\""
 		Protocol  LoadBalancerPoolProtocol "json:\"protocol\" graphql:\"protocol\""
 		OwnerID   gidx.PrefixedID          "json:\"ownerID\" graphql:\"ownerID\""
 		CreatedAt time.Time                "json:\"createdAt\" graphql:\"createdAt\""
 		UpdatedAt time.Time                "json:\"updatedAt\" graphql:\"updatedAt\""
+		DeletedAt *time.Time               "json:\"deletedAt\" graphql:\"deletedAt\""
 	} "json:\"loadBalancerPool\" graphql:\"loadBalancerPool\""
 }
 type GetLoadBalancerPoolOrigin struct {
@@ -108,6 +118,7 @@ type GetLoadBalancerPoolOrigin struct {
 					PoolID     gidx.PrefixedID "json:\"poolID\" graphql:\"poolID\""
 					CreatedAt  time.Time       "json:\"createdAt\" graphql:\"createdAt\""
 					UpdatedAt  time.Time       "json:\"updatedAt\" graphql:\"updatedAt\""
+					DeletedAt  *time.Time      "json:\"deletedAt\" graphql:\"deletedAt\""
 				} "json:\"node\" graphql:\"node\""
 			} "json:\"edges\" graphql:\"edges\""
 		} "json:\"origins\" graphql:\"origins\""
@@ -123,8 +134,9 @@ type GetLoadBalancerPort struct {
 					LoadBalancer struct {
 						ID gidx.PrefixedID "json:\"id\" graphql:\"id\""
 					} "json:\"loadBalancer\" graphql:\"loadBalancer\""
-					CreatedAt time.Time "json:\"createdAt\" graphql:\"createdAt\""
-					UpdatedAt time.Time "json:\"updatedAt\" graphql:\"updatedAt\""
+					CreatedAt time.Time  "json:\"createdAt\" graphql:\"createdAt\""
+					UpdatedAt time.Time  "json:\"updatedAt\" graphql:\"updatedAt\""
+					DeletedAt *time.Time "json:\"deletedAt\" graphql:\"deletedAt\""
 				} "json:\"node\" graphql:\"node\""
 			} "json:\"edges\" graphql:\"edges\""
 		} "json:\"ports\" graphql:\"ports\""
@@ -167,8 +179,9 @@ type LoadBalancerCreate struct {
 			Location struct {
 				ID gidx.PrefixedID "json:\"id\" graphql:\"id\""
 			} "json:\"location\" graphql:\"location\""
-			CreatedAt time.Time "json:\"createdAt\" graphql:\"createdAt\""
-			UpdatedAt time.Time "json:\"updatedAt\" graphql:\"updatedAt\""
+			CreatedAt time.Time  "json:\"createdAt\" graphql:\"createdAt\""
+			UpdatedAt time.Time  "json:\"updatedAt\" graphql:\"updatedAt\""
+			DeletedAt *time.Time "json:\"deletedAt\" graphql:\"deletedAt\""
 		} "json:\"loadBalancer\" graphql:\"loadBalancer\""
 	} "json:\"loadBalancerCreate\" graphql:\"loadBalancerCreate\""
 }
@@ -188,6 +201,7 @@ type LoadBalancerOriginCreate struct {
 			PoolID     gidx.PrefixedID "json:\"poolID\" graphql:\"poolID\""
 			CreatedAt  time.Time       "json:\"createdAt\" graphql:\"createdAt\""
 			UpdatedAt  time.Time       "json:\"updatedAt\" graphql:\"updatedAt\""
+			DeletedAt  *time.Time      "json:\"deletedAt\" graphql:\"deletedAt\""
 		} "json:\"loadBalancerOrigin\" graphql:\"loadBalancerOrigin\""
 	} "json:\"loadBalancerOriginCreate\" graphql:\"loadBalancerOriginCreate\""
 }
@@ -207,6 +221,7 @@ type LoadBalancerOriginUpdate struct {
 			PoolID     gidx.PrefixedID "json:\"poolID\" graphql:\"poolID\""
 			CreatedAt  time.Time       "json:\"createdAt\" graphql:\"createdAt\""
 			UpdatedAt  time.Time       "json:\"updatedAt\" graphql:\"updatedAt\""
+			DeletedAt  *time.Time      "json:\"deletedAt\" graphql:\"deletedAt\""
 		} "json:\"loadBalancerOrigin\" graphql:\"loadBalancerOrigin\""
 	} "json:\"loadBalancerOriginUpdate\" graphql:\"loadBalancerOriginUpdate\""
 }
@@ -219,6 +234,7 @@ type LoadBalancerPoolCreate struct {
 			OwnerID   gidx.PrefixedID          "json:\"ownerID\" graphql:\"ownerID\""
 			CreatedAt time.Time                "json:\"createdAt\" graphql:\"createdAt\""
 			UpdatedAt time.Time                "json:\"updatedAt\" graphql:\"updatedAt\""
+			DeletedAt *time.Time               "json:\"deletedAt\" graphql:\"deletedAt\""
 		} "json:\"loadBalancerPool\" graphql:\"loadBalancerPool\""
 	} "json:\"loadBalancerPoolCreate\" graphql:\"loadBalancerPoolCreate\""
 }
@@ -236,6 +252,7 @@ type LoadBalancerPoolUpdate struct {
 			OwnerID   gidx.PrefixedID          "json:\"ownerID\" graphql:\"ownerID\""
 			CreatedAt time.Time                "json:\"createdAt\" graphql:\"createdAt\""
 			UpdatedAt time.Time                "json:\"updatedAt\" graphql:\"updatedAt\""
+			DeletedAt *time.Time               "json:\"deletedAt\" graphql:\"deletedAt\""
 		} "json:\"loadBalancerPool\" graphql:\"loadBalancerPool\""
 	} "json:\"loadBalancerPoolUpdate\" graphql:\"loadBalancerPoolUpdate\""
 }
@@ -248,8 +265,9 @@ type LoadBalancerPortCreate struct {
 			LoadBalancer struct {
 				ID gidx.PrefixedID "json:\"id\" graphql:\"id\""
 			} "json:\"loadBalancer\" graphql:\"loadBalancer\""
-			CreatedAt time.Time "json:\"createdAt\" graphql:\"createdAt\""
-			UpdatedAt time.Time "json:\"updatedAt\" graphql:\"updatedAt\""
+			CreatedAt time.Time  "json:\"createdAt\" graphql:\"createdAt\""
+			UpdatedAt time.Time  "json:\"updatedAt\" graphql:\"updatedAt\""
+			DeletedAt *time.Time "json:\"deletedAt\" graphql:\"deletedAt\""
 		} "json:\"loadBalancerPort\" graphql:\"loadBalancerPort\""
 	} "json:\"loadBalancerPortCreate\" graphql:\"loadBalancerPortCreate\""
 }
@@ -304,6 +322,7 @@ type LoadBalancerUpdate struct {
 			Name      string          "json:\"name\" graphql:\"name\""
 			CreatedAt time.Time       "json:\"createdAt\" graphql:\"createdAt\""
 			UpdatedAt time.Time       "json:\"updatedAt\" graphql:\"updatedAt\""
+			DeletedAt *time.Time      "json:\"deletedAt\" graphql:\"deletedAt\""
 		} "json:\"loadBalancer\" graphql:\"loadBalancer\""
 	} "json:\"loadBalancerUpdate\" graphql:\"loadBalancerUpdate\""
 }
@@ -323,6 +342,7 @@ const GetLoadBalancerDocument = `query GetLoadBalancer ($id: ID!) {
 		}
 		createdAt
 		updatedAt
+		deletedAt
 	}
 }
 `
@@ -344,10 +364,19 @@ const GetLoadBalancerPoolDocument = `query GetLoadBalancerPool ($id: ID!) {
 	loadBalancerPool(id: $id) {
 		id
 		name
+		origins {
+			edges {
+				node {
+					id
+					deletedAt
+				}
+			}
+		}
 		protocol
 		ownerID
 		createdAt
 		updatedAt
+		deletedAt
 	}
 }
 `
@@ -378,6 +407,7 @@ const GetLoadBalancerPoolOriginDocument = `query GetLoadBalancerPoolOrigin ($id:
 					poolID
 					createdAt
 					updatedAt
+					deletedAt
 				}
 			}
 		}
@@ -411,6 +441,7 @@ const GetLoadBalancerPortDocument = `query GetLoadBalancerPort ($id: ID!, $porti
 					}
 					createdAt
 					updatedAt
+					deletedAt
 				}
 			}
 		}
@@ -504,6 +535,7 @@ const LoadBalancerCreateDocument = `mutation LoadBalancerCreate ($input: CreateL
 			}
 			createdAt
 			updatedAt
+			deletedAt
 		}
 	}
 }
@@ -553,6 +585,7 @@ const LoadBalancerOriginCreateDocument = `mutation LoadBalancerOriginCreate ($in
 			poolID
 			createdAt
 			updatedAt
+			deletedAt
 		}
 	}
 }
@@ -602,6 +635,7 @@ const LoadBalancerOriginUpdateDocument = `mutation LoadBalancerOriginUpdate ($id
 			poolID
 			createdAt
 			updatedAt
+			deletedAt
 		}
 	}
 }
@@ -630,6 +664,7 @@ const LoadBalancerPoolCreateDocument = `mutation LoadBalancerPoolCreate ($input:
 			ownerID
 			createdAt
 			updatedAt
+			deletedAt
 		}
 	}
 }
@@ -677,6 +712,7 @@ const LoadBalancerPoolUpdateDocument = `mutation LoadBalancerPoolUpdate ($id: ID
 			ownerID
 			createdAt
 			updatedAt
+			deletedAt
 		}
 	}
 }
@@ -707,6 +743,7 @@ const LoadBalancerPortCreateDocument = `mutation LoadBalancerPortCreate ($input:
 			}
 			createdAt
 			updatedAt
+			deletedAt
 		}
 	}
 }
@@ -853,6 +890,7 @@ const LoadBalancerUpdateDocument = `mutation LoadBalancerUpdate ($id: ID!, $inpu
 			name
 			createdAt
 			updatedAt
+			deletedAt
 		}
 	}
 }

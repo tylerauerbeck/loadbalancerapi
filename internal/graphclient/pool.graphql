@@ -2,10 +2,19 @@ query GetLoadBalancerPool($id: ID!) {
   loadBalancerPool(id: $id) {
     id
     name
+    origins {
+      edges {
+        node {
+          id
+          deletedAt
+        }
+      }
+    }
     protocol
     ownerID
     createdAt
     updatedAt
+    deletedAt
   }
 }
 
@@ -18,6 +27,7 @@ mutation LoadBalancerPoolCreate($input: CreateLoadBalancerPoolInput!) {
       ownerID
       createdAt
       updatedAt
+      deletedAt
     }
   }
 }
@@ -31,6 +41,7 @@ mutation LoadBalancerPoolUpdate($id: ID!, $input: UpdateLoadBalancerPoolInput!) 
       ownerID
       createdAt
       updatedAt
+      deletedAt
     }
   }
 }

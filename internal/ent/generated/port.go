@@ -37,6 +37,8 @@ type Port struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	// DeletedAt holds the value of the "deleted_at" field.
+	DeletedAt time.Time `json:"deleted_at,omitempty"`
 	// Number holds the value of the "number" field.
 	Number int `json:"number,omitempty"`
 	// Name holds the value of the "name" field.
@@ -97,7 +99,7 @@ func (*Port) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case port.FieldName:
 			values[i] = new(sql.NullString)
-		case port.FieldCreatedAt, port.FieldUpdatedAt:
+		case port.FieldCreatedAt, port.FieldUpdatedAt, port.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -131,6 +133,12 @@ func (po *Port) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
 				po.UpdatedAt = value.Time
+			}
+		case port.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
+			} else if value.Valid {
+				po.DeletedAt = value.Time
 			}
 		case port.FieldNumber:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -201,6 +209,9 @@ func (po *Port) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
 	builder.WriteString(po.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("deleted_at=")
+	builder.WriteString(po.DeletedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("number=")
 	builder.WriteString(fmt.Sprintf("%v", po.Number))

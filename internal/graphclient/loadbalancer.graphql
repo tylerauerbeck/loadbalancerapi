@@ -13,6 +13,7 @@ query GetLoadBalancer($id: ID!) {
     }
     createdAt
     updatedAt
+    deletedAt
   }
 }
 
@@ -47,6 +48,7 @@ mutation LoadBalancerCreate($input: CreateLoadBalancerInput!) {
       }
       createdAt
       updatedAt
+      deletedAt
     }
   }
 }
@@ -58,6 +60,7 @@ mutation LoadBalancerUpdate($id: ID!, $input: UpdateLoadBalancerInput!) {
       name
       createdAt
       updatedAt
+      deletedAt
     }
   }
 }

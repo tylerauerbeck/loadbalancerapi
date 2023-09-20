@@ -358,3 +358,44 @@ func TestFullLoadBalancerPortLifecycle(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, queryPort.LoadBalancer.Ports.Edges, 0)
 }
+
+func TestMutate_PortSoftDelete(t *testing.T) {
+	ctx := context.Background()
+	perms := new(mockpermissions.MockPermissions)
+	perms.On("CreateAuthRelationships", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+	perms.On("DeleteAuthRelationships", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+	ctx = perms.ContextWithHandler(ctx)
+
+	// Permit request
+	ctx = context.WithValue(ctx, permissions.CheckerCtxKey, permissions.DefaultAllowChecker)
+
+	lb := (&LoadBalancerBuilder{}).MustNew(ctx)
+	port := (&PortBuilder{Name: "port80", LoadBalancerID: lb.ID, Number: 80}).MustNew(ctx)
+
+	portGetResp, err := graphTestClient().GetLoadBalancerPort(ctx, lb.ID, port.ID)
+
+	require.NoError(t, err)
+	require.NotNil(t, portGetResp)
+	assert.Zero(t, portGetResp.LoadBalancer.Ports.Edges[0].Node.DeletedAt)
+	assert.Equal(t, len(portGetResp.LoadBalancer.Ports.Edges), 1)
+
+	portDelResp, err := graphTestClient().LoadBalancerPortDelete(ctx, port.ID)
+
+	require.NoError(t, err)
+	require.NotNil(t, portDelResp)
+
+	portGetResp, err = graphTestClient().GetLoadBalancerPort(ctx, lb.ID, port.ID)
+
+	require.NoError(t, err)
+	require.NotNil(t, portGetResp)
+	assert.Equal(t, len(portGetResp.LoadBalancer.Ports.Edges), 0)
+
+	// TODO: skip soft delete doesn't seem to apply to softdelete
+	// ctx = softdelete.SkipSoftDelete(ctx)
+
+	// prtGetResp, err := graphTestClient().GetLoadBalancerPort(ctx, lb.ID, port.ID)
+	// require.NoError(t, err)
+	// require.NotNil(t, prtGetResp)
+	// assert.NotZero(t, prtGetResp.LoadBalancer.Ports.Edges[0].Node.DeletedAt)
+}

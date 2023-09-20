@@ -11,6 +11,7 @@ query GetLoadBalancerPoolOrigin($id: ID!, $originid: ID!) {
           poolID
           createdAt
           updatedAt
+          deletedAt
         }
       }
     }
@@ -28,6 +29,7 @@ mutation LoadBalancerOriginCreate($input: CreateLoadBalancerOriginInput!) {
       poolID
       createdAt
       updatedAt
+      deletedAt
     }
   }
 }
@@ -43,6 +45,7 @@ mutation LoadBalancerOriginUpdate($id: ID!, $input: UpdateLoadBalancerOriginInpu
       poolID
       createdAt
       updatedAt
+      deletedAt
     }
   }
 }

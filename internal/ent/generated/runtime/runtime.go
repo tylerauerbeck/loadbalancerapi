@@ -174,6 +174,10 @@ func init() {
 	// pool.DefaultID holds the default value on creation for the id field.
 	pool.DefaultID = poolDescID.Default.(func() gidx.PrefixedID)
 	portMixin := schema.Port{}.Mixin()
+	portMixinHooks1 := portMixin[1].Hooks()
+	port.Hooks[0] = portMixinHooks1[0]
+	portMixinInters1 := portMixin[1].Interceptors()
+	port.Interceptors[0] = portMixinInters1[0]
 	portMixinFields0 := portMixin[0].Fields()
 	_ = portMixinFields0
 	portFields := schema.Port{}.Fields()

@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -40,6 +41,26 @@ type PortUpdate struct {
 // Where appends a list predicates to the PortUpdate builder.
 func (pu *PortUpdate) Where(ps ...predicate.Port) *PortUpdate {
 	pu.mutation.Where(ps...)
+	return pu
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (pu *PortUpdate) SetDeletedAt(t time.Time) *PortUpdate {
+	pu.mutation.SetDeletedAt(t)
+	return pu
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (pu *PortUpdate) SetNillableDeletedAt(t *time.Time) *PortUpdate {
+	if t != nil {
+		pu.SetDeletedAt(*t)
+	}
+	return pu
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (pu *PortUpdate) ClearDeletedAt() *PortUpdate {
+	pu.mutation.ClearDeletedAt()
 	return pu
 }
 
@@ -105,7 +126,9 @@ func (pu *PortUpdate) RemovePools(p ...*Pool) *PortUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (pu *PortUpdate) Save(ctx context.Context) (int, error) {
-	pu.defaults()
+	if err := pu.defaults(); err != nil {
+		return 0, err
+	}
 	return withHooks(ctx, pu.sqlSave, pu.mutation, pu.hooks)
 }
 
@@ -132,11 +155,15 @@ func (pu *PortUpdate) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (pu *PortUpdate) defaults() {
+func (pu *PortUpdate) defaults() error {
 	if _, ok := pu.mutation.UpdatedAt(); !ok {
+		if port.UpdateDefaultUpdatedAt == nil {
+			return fmt.Errorf("generated: uninitialized port.UpdateDefaultUpdatedAt (forgotten import generated/runtime?)")
+		}
 		v := port.UpdateDefaultUpdatedAt()
 		pu.mutation.SetUpdatedAt(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -171,6 +198,12 @@ func (pu *PortUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := pu.mutation.UpdatedAt(); ok {
 		_spec.SetField(port.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := pu.mutation.DeletedAt(); ok {
+		_spec.SetField(port.FieldDeletedAt, field.TypeTime, value)
+	}
+	if pu.mutation.DeletedAtCleared() {
+		_spec.ClearField(port.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := pu.mutation.Number(); ok {
 		_spec.SetField(port.FieldNumber, field.TypeInt, value)
@@ -244,6 +277,26 @@ type PortUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *PortMutation
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (puo *PortUpdateOne) SetDeletedAt(t time.Time) *PortUpdateOne {
+	puo.mutation.SetDeletedAt(t)
+	return puo
+}
+
+// SetNillableDeletedAt sets the "deleted_at" field if the given value is not nil.
+func (puo *PortUpdateOne) SetNillableDeletedAt(t *time.Time) *PortUpdateOne {
+	if t != nil {
+		puo.SetDeletedAt(*t)
+	}
+	return puo
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (puo *PortUpdateOne) ClearDeletedAt() *PortUpdateOne {
+	puo.mutation.ClearDeletedAt()
+	return puo
 }
 
 // SetNumber sets the "number" field.
@@ -321,7 +374,9 @@ func (puo *PortUpdateOne) Select(field string, fields ...string) *PortUpdateOne 
 
 // Save executes the query and returns the updated Port entity.
 func (puo *PortUpdateOne) Save(ctx context.Context) (*Port, error) {
-	puo.defaults()
+	if err := puo.defaults(); err != nil {
+		return nil, err
+	}
 	return withHooks(ctx, puo.sqlSave, puo.mutation, puo.hooks)
 }
 
@@ -348,11 +403,15 @@ func (puo *PortUpdateOne) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (puo *PortUpdateOne) defaults() {
+func (puo *PortUpdateOne) defaults() error {
 	if _, ok := puo.mutation.UpdatedAt(); !ok {
+		if port.UpdateDefaultUpdatedAt == nil {
+			return fmt.Errorf("generated: uninitialized port.UpdateDefaultUpdatedAt (forgotten import generated/runtime?)")
+		}
 		v := port.UpdateDefaultUpdatedAt()
 		puo.mutation.SetUpdatedAt(v)
 	}
+	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -404,6 +463,12 @@ func (puo *PortUpdateOne) sqlSave(ctx context.Context) (_node *Port, err error) 
 	}
 	if value, ok := puo.mutation.UpdatedAt(); ok {
 		_spec.SetField(port.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if value, ok := puo.mutation.DeletedAt(); ok {
+		_spec.SetField(port.FieldDeletedAt, field.TypeTime, value)
+	}
+	if puo.mutation.DeletedAtCleared() {
+		_spec.ClearField(port.FieldDeletedAt, field.TypeTime)
 	}
 	if value, ok := puo.mutation.Number(); ok {
 		_spec.SetField(port.FieldNumber, field.TypeInt, value)

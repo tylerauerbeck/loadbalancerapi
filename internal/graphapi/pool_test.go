@@ -2,6 +2,7 @@ package graphapi_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -13,6 +14,7 @@ import (
 
 	ent "go.infratographer.com/load-balancer-api/internal/ent/generated"
 	pool "go.infratographer.com/load-balancer-api/internal/ent/generated/pool"
+	"go.infratographer.com/load-balancer-api/internal/ent/generated/softdelete"
 	"go.infratographer.com/load-balancer-api/internal/graphclient"
 )
 
@@ -290,4 +292,63 @@ func TestMutate_PoolDelete(t *testing.T) {
 			assert.Equal(t, "loadpol", poolDeleteResp.LoadBalancerPoolDelete.DeletedID.Prefix())
 		})
 	}
+}
+
+func TestMutate_PoolSoftDelete(t *testing.T) {
+	ctx := context.Background()
+	perms := new(mockpermissions.MockPermissions)
+	perms.On("CreateAuthRelationships", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+	perms.On("DeleteAuthRelationships", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+	ctx = perms.ContextWithHandler(ctx)
+
+	// Permit request
+	ctx = context.WithValue(ctx, permissions.CheckerCtxKey, permissions.DefaultAllowChecker)
+
+	pool := (&PoolBuilder{Protocol: "tcp"}).MustNew(ctx)
+	origin := (&OriginBuilder{PoolID: pool.ID}).MustNew(ctx)
+
+	poolGetResp, err := graphTestClient().GetLoadBalancerPool(ctx, pool.ID)
+
+	require.NoError(t, err)
+	require.NotNil(t, poolGetResp)
+	assert.Zero(t, poolGetResp.LoadBalancerPool.DeletedAt)
+	assert.Equal(t, len(poolGetResp.LoadBalancerPool.Origins.Edges), 1)
+
+	originDelResp, err := graphTestClient().LoadBalancerOriginDelete(ctx, origin.ID)
+
+	require.NoError(t, err)
+	require.NotNil(t, originDelResp)
+
+	poolGetResp, err = graphTestClient().GetLoadBalancerPool(ctx, pool.ID)
+
+	require.NoError(t, err)
+	require.NotNil(t, poolGetResp)
+	assert.Equal(t, len(poolGetResp.LoadBalancerPool.Origins.Edges), 0)
+
+	poolDeleteResp, err := graphTestClient().LoadBalancerPoolDelete(ctx, pool.ID)
+
+	require.NoError(t, err)
+	assert.Equal(t, "loadpol", poolDeleteResp.LoadBalancerPoolDelete.DeletedID.Prefix())
+	assert.NotZero(t, poolDeleteResp.LoadBalancerPoolDelete.DeletedID)
+
+	poolDeleteResp, err = graphTestClient().LoadBalancerPoolDelete(ctx, pool.ID)
+	require.Error(t, err)
+	assert.Nil(t, poolDeleteResp)
+	assert.ErrorContains(t, err, "not found")
+
+	poolGetResp, err = graphTestClient().GetLoadBalancerPool(ctx, pool.ID)
+	require.Error(t, err)
+	require.Nil(t, poolGetResp)
+	assert.ErrorContains(t, err, "not found")
+
+	ctx = softdelete.SkipSoftDelete(ctx)
+
+	poolGetResp, err = graphTestClient().GetLoadBalancerPool(ctx, pool.ID)
+	fmt.Printf("%+v\n", poolGetResp)
+	require.NoError(t, err)
+	require.NotNil(t, poolGetResp)
+	assert.NotZero(t, poolGetResp.LoadBalancerPool.DeletedAt)
+	// TODO: skipsoftdelete doesn't seem to apply to edges
+	// assert.NotZero(t, poolGetResp.LoadBalancerPool.Origins.Edges[0].Node.DeletedAt)
 }

@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/field"
@@ -39,7 +40,10 @@ type Mixin struct {
 func (Mixin) Fields() []ent.Field {
 	return []ent.Field{
 		field.Time("deleted_at").
-			Optional(),
+			Optional().
+			Annotations(
+				entgql.Skip(entgql.SkipMutationCreateInput, entgql.SkipMutationUpdateInput),
+			),
 	}
 }
 
@@ -48,6 +52,10 @@ type softDeleteKey struct{}
 // SkipSoftDelete returns a new context that skips the soft-delete interceptor/mutators.
 func SkipSoftDelete(parent context.Context) context.Context {
 	return context.WithValue(parent, softDeleteKey{}, true)
+}
+
+func CheckSoftDelete(ctx context.Context) bool {
+	return ctx.Value(softDeleteKey{}) != nil
 }
 
 // Interceptors of the SoftDeleteMixin.

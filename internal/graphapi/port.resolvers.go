@@ -6,6 +6,7 @@ package graphapi
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"go.infratographer.com/load-balancer-api/internal/ent/generated"
@@ -38,20 +39,26 @@ func (r *mutationResolver) LoadBalancerPortUpdate(ctx context.Context, id gidx.P
 	if err != nil {
 		return nil, err
 	}
+
 	if err := permissions.CheckAccess(ctx, p.LoadBalancerID, actionLoadBalancerUpdate); err != nil {
 		return nil, err
 	}
 
-	p, err = p.Update().SetInput(input).Save(ctx)
-	if err != nil {
-		if generated.IsConstraintError(err) && strings.Contains(err.Error(), "number") {
-			return nil, ErrPortNumberInUse
-		} else {
-			return nil, err
+	if p.DeletedAt.IsZero() {
+
+		p, err = p.Update().SetInput(input).Save(ctx)
+		if err != nil {
+			if generated.IsConstraintError(err) && strings.Contains(err.Error(), "number") {
+				return nil, ErrPortNumberInUse
+			} else {
+				return nil, err
+			}
 		}
+
+		return &LoadBalancerPortUpdatePayload{LoadBalancerPort: p}, nil
 	}
 
-	return &LoadBalancerPortUpdatePayload{LoadBalancerPort: p}, nil
+	return nil, fmt.Errorf("port %s not found", id)
 }
 
 // LoadBalancerPortDelete is the resolver for the loadBalancerPortDelete field.
@@ -65,9 +72,14 @@ func (r *mutationResolver) LoadBalancerPortDelete(ctx context.Context, id gidx.P
 		return nil, err
 	}
 
-	if err := r.client.Port.DeleteOneID(id).Exec(ctx); err != nil {
-		return nil, err
+	if p.DeletedAt.IsZero() {
+
+		if err := r.client.Port.DeleteOneID(id).Exec(ctx); err != nil {
+			return nil, err
+		}
+
+		return &LoadBalancerPortDeletePayload{DeletedID: id}, nil
 	}
 
-	return &LoadBalancerPortDeletePayload{DeletedID: id}, nil
+	return nil, fmt.Errorf("port %s not found", id)
 }

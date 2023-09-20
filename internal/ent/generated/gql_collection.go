@@ -639,6 +639,11 @@ func (po *PortQuery) collectField(ctx context.Context, opCtx *graphql.OperationC
 				selectedFields = append(selectedFields, port.FieldUpdatedAt)
 				fieldSeen[port.FieldUpdatedAt] = struct{}{}
 			}
+		case "deletedAt":
+			if _, ok := fieldSeen[port.FieldDeletedAt]; !ok {
+				selectedFields = append(selectedFields, port.FieldDeletedAt)
+				fieldSeen[port.FieldDeletedAt] = struct{}{}
+			}
 		case "number":
 			if _, ok := fieldSeen[port.FieldNumber]; !ok {
 				selectedFields = append(selectedFields, port.FieldNumber)

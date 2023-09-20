@@ -819,12 +819,14 @@ func (c *PortClient) QueryLoadBalancer(po *Port) *LoadBalancerQuery {
 
 // Hooks returns the client hooks.
 func (c *PortClient) Hooks() []Hook {
-	return c.hooks.Port
+	hooks := c.hooks.Port
+	return append(hooks[:len(hooks):len(hooks)], port.Hooks[:]...)
 }
 
 // Interceptors returns the client interceptors.
 func (c *PortClient) Interceptors() []Interceptor {
-	return c.inters.Port
+	inters := c.inters.Port
+	return append(inters[:len(inters):len(inters)], port.Interceptors[:]...)
 }
 
 func (c *PortClient) mutate(ctx context.Context, m *PortMutation) (Value, error) {

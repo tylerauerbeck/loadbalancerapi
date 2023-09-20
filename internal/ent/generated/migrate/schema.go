@@ -155,6 +155,7 @@ var (
 		{Name: "id", Type: field.TypeString, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
 		{Name: "number", Type: field.TypeInt},
 		{Name: "name", Type: field.TypeString},
 		{Name: "load_balancer_id", Type: field.TypeString},
@@ -167,7 +168,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "ports_load_balancers_load_balancer",
-				Columns:    []*schema.Column{PortsColumns[5]},
+				Columns:    []*schema.Column{PortsColumns[6]},
 				RefColumns: []*schema.Column{LoadBalancersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -186,12 +187,12 @@ var (
 			{
 				Name:    "port_load_balancer_id",
 				Unique:  false,
-				Columns: []*schema.Column{PortsColumns[5]},
+				Columns: []*schema.Column{PortsColumns[6]},
 			},
 			{
 				Name:    "port_load_balancer_id_number",
 				Unique:  true,
-				Columns: []*schema.Column{PortsColumns[5], PortsColumns[3]},
+				Columns: []*schema.Column{PortsColumns[6], PortsColumns[4]},
 			},
 		},
 	}

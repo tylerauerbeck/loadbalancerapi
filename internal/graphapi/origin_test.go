@@ -14,6 +14,8 @@ import (
 
 	ent "go.infratographer.com/load-balancer-api/internal/ent/generated"
 	"go.infratographer.com/load-balancer-api/internal/graphclient"
+
+	_ "go.infratographer.com/load-balancer-api/internal/ent/generated/runtime"
 )
 
 func TestQueryPoolOrigin(t *testing.T) {

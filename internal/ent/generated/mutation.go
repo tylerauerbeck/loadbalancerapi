@@ -2495,6 +2495,7 @@ type PortMutation struct {
 	id                   *gidx.PrefixedID
 	created_at           *time.Time
 	updated_at           *time.Time
+	deleted_at           *time.Time
 	number               *int
 	addnumber            *int
 	name                 *string
@@ -2683,6 +2684,55 @@ func (m *PortMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error
 // ResetUpdatedAt resets all changes to the "updated_at" field.
 func (m *PortMutation) ResetUpdatedAt() {
 	m.updated_at = nil
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *PortMutation) SetDeletedAt(t time.Time) {
+	m.deleted_at = &t
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *PortMutation) DeletedAt() (r time.Time, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the Port entity.
+// If the Port object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PortMutation) OldDeletedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// ClearDeletedAt clears the value of the "deleted_at" field.
+func (m *PortMutation) ClearDeletedAt() {
+	m.deleted_at = nil
+	m.clearedFields[port.FieldDeletedAt] = struct{}{}
+}
+
+// DeletedAtCleared returns if the "deleted_at" field was cleared in this mutation.
+func (m *PortMutation) DeletedAtCleared() bool {
+	_, ok := m.clearedFields[port.FieldDeletedAt]
+	return ok
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *PortMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	delete(m.clearedFields, port.FieldDeletedAt)
 }
 
 // SetNumber sets the "number" field.
@@ -2927,12 +2977,15 @@ func (m *PortMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PortMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.created_at != nil {
 		fields = append(fields, port.FieldCreatedAt)
 	}
 	if m.updated_at != nil {
 		fields = append(fields, port.FieldUpdatedAt)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, port.FieldDeletedAt)
 	}
 	if m.number != nil {
 		fields = append(fields, port.FieldNumber)
@@ -2955,6 +3008,8 @@ func (m *PortMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case port.FieldUpdatedAt:
 		return m.UpdatedAt()
+	case port.FieldDeletedAt:
+		return m.DeletedAt()
 	case port.FieldNumber:
 		return m.Number()
 	case port.FieldName:
@@ -2974,6 +3029,8 @@ func (m *PortMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldCreatedAt(ctx)
 	case port.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
+	case port.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
 	case port.FieldNumber:
 		return m.OldNumber(ctx)
 	case port.FieldName:
@@ -3002,6 +3059,13 @@ func (m *PortMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdatedAt(v)
+		return nil
+	case port.FieldDeletedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
 		return nil
 	case port.FieldNumber:
 		v, ok := value.(int)
@@ -3068,7 +3132,11 @@ func (m *PortMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *PortMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(port.FieldDeletedAt) {
+		fields = append(fields, port.FieldDeletedAt)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -3081,6 +3149,11 @@ func (m *PortMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *PortMutation) ClearField(name string) error {
+	switch name {
+	case port.FieldDeletedAt:
+		m.ClearDeletedAt()
+		return nil
+	}
 	return fmt.Errorf("unknown Port nullable field %s", name)
 }
 
@@ -3093,6 +3166,9 @@ func (m *PortMutation) ResetField(name string) error {
 		return nil
 	case port.FieldUpdatedAt:
 		m.ResetUpdatedAt()
+		return nil
+	case port.FieldDeletedAt:
+		m.ResetDeletedAt()
 		return nil
 	case port.FieldNumber:
 		m.ResetNumber()
