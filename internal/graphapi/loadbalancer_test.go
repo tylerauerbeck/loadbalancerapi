@@ -13,6 +13,7 @@ import (
 	"go.infratographer.com/x/gidx"
 
 	ent "go.infratographer.com/load-balancer-api/internal/ent/generated"
+	"go.infratographer.com/load-balancer-api/internal/ent/generated/softdelete"
 	"go.infratographer.com/load-balancer-api/internal/graphclient"
 )
 
@@ -347,4 +348,57 @@ func TestFullLoadBalancerLifecycle(t *testing.T) {
 	require.Error(t, err)
 	require.Nil(t, deletedLB)
 	require.ErrorContains(t, err, "load_balancer not found")
+}
+
+func TestMutate_LoadBalancerSoftDelete(t *testing.T) {
+	ctx := context.Background()
+	perms := new(mockpermissions.MockPermissions)
+	perms.On("CreateAuthRelationships", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+	perms.On("DeleteAuthRelationships", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+	ctx = perms.ContextWithHandler(ctx)
+
+	// Permit request
+	ctx = context.WithValue(ctx, permissions.CheckerCtxKey, permissions.DefaultAllowChecker)
+
+	prv := (&ProviderBuilder{}).MustNew(ctx)
+	lb := (&LoadBalancerBuilder{Provider: prv}).MustNew(ctx)
+
+	lbGetResp, err := graphTestClient().GetLoadBalancer(ctx, lb.ID)
+
+	require.NoError(t, err)
+	require.NotNil(t, lbGetResp)
+	assert.Zero(t, lbGetResp.LoadBalancer.DeletedAt)
+
+	lbDelResp, err := graphTestClient().LoadBalancerDelete(ctx, lb.ID)
+
+	require.NoError(t, err)
+	require.NotNil(t, lbDelResp)
+
+	lbDelResp, err = graphTestClient().LoadBalancerDelete(ctx, lb.ID)
+
+	require.Error(t, err)
+	require.Nil(t, lbDelResp)
+	require.ErrorContains(t, err, "not found")
+
+	lbGetResp, err = graphTestClient().GetLoadBalancer(ctx, lb.ID)
+
+	require.Error(t, err)
+	require.Nil(t, lbGetResp)
+	require.ErrorContains(t, err, "not found")
+
+	chk := softdelete.CheckSoftDelete(ctx)
+	assert.Equal(t, chk, false)
+
+	ctx = softdelete.SkipSoftDelete(ctx)
+
+	chk = softdelete.CheckSoftDelete(ctx)
+	assert.Equal(t, chk, true)
+
+	// lbGetResp, err = graphTestClient().GetLoadBalancer(ctx, lb.ID)
+	// fmt.Printf("lbGetResp: %+v\n", lbGetResp)
+
+	// require.NoError(t, err)
+	// require.NotNil(t, lbGetResp)
+	// assert.NotZero(t, lbGetResp.LoadBalancer.DeletedAt)
 }

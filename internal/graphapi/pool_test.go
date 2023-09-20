@@ -342,7 +342,13 @@ func TestMutate_PoolSoftDelete(t *testing.T) {
 	require.Nil(t, poolGetResp)
 	assert.ErrorContains(t, err, "not found")
 
+	chk := softdelete.CheckSoftDelete(ctx)
+	assert.Equal(t, chk, false)
+
 	ctx = softdelete.SkipSoftDelete(ctx)
+
+	chk = softdelete.CheckSoftDelete(ctx)
+	assert.Equal(t, chk, true)
 
 	poolGetResp, err = graphTestClient().GetLoadBalancerPool(ctx, pool.ID)
 	fmt.Printf("%+v\n", poolGetResp)

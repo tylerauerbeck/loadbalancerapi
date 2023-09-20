@@ -343,3 +343,39 @@ func TestMutate_OriginDelete(t *testing.T) {
 		})
 	}
 }
+
+func TestMutate_OriginSoftDelete(t *testing.T) {
+	ctx := context.Background()
+	perms := new(mockpermissions.MockPermissions)
+	perms.On("CreateAuthRelationships", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+	perms.On("DeleteAuthRelationships", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+	ctx = perms.ContextWithHandler(ctx)
+
+	// Permit request
+	ctx = context.WithValue(ctx, permissions.CheckerCtxKey, permissions.DefaultAllowChecker)
+
+	pool := (&PoolBuilder{}).MustNew(ctx)
+	origin := (&OriginBuilder{PoolID: pool.ID}).MustNew(ctx)
+
+	originGetResp, err := graphTestClient().GetLoadBalancerPoolOrigin(ctx, pool.ID, origin.ID)
+
+	require.NoError(t, err)
+	require.NotNil(t, originGetResp)
+	assert.Zero(t, originGetResp.LoadBalancerPool.Origins.Edges[0].Node.DeletedAt)
+	assert.Equal(t, len(originGetResp.LoadBalancerPool.Origins.Edges), 1)
+
+	originDelResp, err := graphTestClient().LoadBalancerOriginDelete(ctx, origin.ID)
+
+	require.NoError(t, err)
+	require.NotNil(t, originDelResp)
+
+	originGetResp, err = graphTestClient().GetLoadBalancerPoolOrigin(ctx, pool.ID, origin.ID)
+
+	require.NoError(t, err)
+	require.NotNil(t, originGetResp)
+	assert.Equal(t, len(originGetResp.LoadBalancerPool.Origins.Edges), 0)
+
+	// TODO: skip soft delete doesn't seem to apply to softdelete
+	// ctx = softdelete.SkipSoftDelete(ctx)
+}
