@@ -2,6 +2,8 @@ module go.infratographer.com/load-balancer-api
 
 go 1.21
 
+replace go.infratographer.com/x => github.com/tylerauerbeck/x v0.0.0-20240109001921-3ff07c5e629f
+
 require (
 	entgo.io/contrib v0.4.5
 	entgo.io/ent v0.12.4

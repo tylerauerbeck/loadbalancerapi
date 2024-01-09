@@ -12,6 +12,7 @@ import (
 	"go.infratographer.com/x/entx"
 	"go.infratographer.com/x/gidx"
 
+	mixin "go.infratographer.com/load-balancer-api/internal/ent/mixins"
 	"go.infratographer.com/load-balancer-api/x/pubsubinfo"
 )
 
@@ -24,7 +25,8 @@ type LoadBalancer struct {
 func (LoadBalancer) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		entx.NewTimestampMixin(),
-		// softdelete.Mixin{},
+		entx.NewAuditMixin(),
+		mixin.SoftDeleteMixin{},
 	}
 }
 

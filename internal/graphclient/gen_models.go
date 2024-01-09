@@ -35,6 +35,8 @@ type Entity interface {
 
 // Input information to create a load balancer.
 type CreateLoadBalancerInput struct {
+	CreatedBy *string `json:"createdBy,omitempty"`
+	UpdatedBy *string `json:"updatedBy,omitempty"`
 	// The name of the load balancer.
 	Name string `json:"name"`
 	// The ID for the owner for this load balancer.
@@ -88,6 +90,10 @@ type LoadBalancer struct {
 	ID        gidx.PrefixedID `json:"id"`
 	CreatedAt time.Time       `json:"createdAt"`
 	UpdatedAt time.Time       `json:"updatedAt"`
+	CreatedBy *string         `json:"createdBy,omitempty"`
+	UpdatedBy *string         `json:"updatedBy,omitempty"`
+	DeletedAt *time.Time      `json:"deletedAt,omitempty"`
+	DeletedBy *string         `json:"deletedBy,omitempty"`
 	// The name of the load balancer.
 	Name  string                     `json:"name"`
 	Ports LoadBalancerPortConnection `json:"ports"`
@@ -703,6 +709,65 @@ type LoadBalancerWhereInput struct {
 	UpdatedAtGte   *time.Time   `json:"updatedAtGTE,omitempty"`
 	UpdatedAtLt    *time.Time   `json:"updatedAtLT,omitempty"`
 	UpdatedAtLte   *time.Time   `json:"updatedAtLTE,omitempty"`
+	// created_by field predicates
+	CreatedBy             *string  `json:"createdBy,omitempty"`
+	CreatedByNeq          *string  `json:"createdByNEQ,omitempty"`
+	CreatedByIn           []string `json:"createdByIn,omitempty"`
+	CreatedByNotIn        []string `json:"createdByNotIn,omitempty"`
+	CreatedByGt           *string  `json:"createdByGT,omitempty"`
+	CreatedByGte          *string  `json:"createdByGTE,omitempty"`
+	CreatedByLt           *string  `json:"createdByLT,omitempty"`
+	CreatedByLte          *string  `json:"createdByLTE,omitempty"`
+	CreatedByContains     *string  `json:"createdByContains,omitempty"`
+	CreatedByHasPrefix    *string  `json:"createdByHasPrefix,omitempty"`
+	CreatedByHasSuffix    *string  `json:"createdByHasSuffix,omitempty"`
+	CreatedByIsNil        *bool    `json:"createdByIsNil,omitempty"`
+	CreatedByNotNil       *bool    `json:"createdByNotNil,omitempty"`
+	CreatedByEqualFold    *string  `json:"createdByEqualFold,omitempty"`
+	CreatedByContainsFold *string  `json:"createdByContainsFold,omitempty"`
+	// updated_by field predicates
+	UpdatedBy             *string  `json:"updatedBy,omitempty"`
+	UpdatedByNeq          *string  `json:"updatedByNEQ,omitempty"`
+	UpdatedByIn           []string `json:"updatedByIn,omitempty"`
+	UpdatedByNotIn        []string `json:"updatedByNotIn,omitempty"`
+	UpdatedByGt           *string  `json:"updatedByGT,omitempty"`
+	UpdatedByGte          *string  `json:"updatedByGTE,omitempty"`
+	UpdatedByLt           *string  `json:"updatedByLT,omitempty"`
+	UpdatedByLte          *string  `json:"updatedByLTE,omitempty"`
+	UpdatedByContains     *string  `json:"updatedByContains,omitempty"`
+	UpdatedByHasPrefix    *string  `json:"updatedByHasPrefix,omitempty"`
+	UpdatedByHasSuffix    *string  `json:"updatedByHasSuffix,omitempty"`
+	UpdatedByIsNil        *bool    `json:"updatedByIsNil,omitempty"`
+	UpdatedByNotNil       *bool    `json:"updatedByNotNil,omitempty"`
+	UpdatedByEqualFold    *string  `json:"updatedByEqualFold,omitempty"`
+	UpdatedByContainsFold *string  `json:"updatedByContainsFold,omitempty"`
+	// deleted_at field predicates
+	DeletedAt       *time.Time   `json:"deletedAt,omitempty"`
+	DeletedAtNeq    *time.Time   `json:"deletedAtNEQ,omitempty"`
+	DeletedAtIn     []*time.Time `json:"deletedAtIn,omitempty"`
+	DeletedAtNotIn  []*time.Time `json:"deletedAtNotIn,omitempty"`
+	DeletedAtGt     *time.Time   `json:"deletedAtGT,omitempty"`
+	DeletedAtGte    *time.Time   `json:"deletedAtGTE,omitempty"`
+	DeletedAtLt     *time.Time   `json:"deletedAtLT,omitempty"`
+	DeletedAtLte    *time.Time   `json:"deletedAtLTE,omitempty"`
+	DeletedAtIsNil  *bool        `json:"deletedAtIsNil,omitempty"`
+	DeletedAtNotNil *bool        `json:"deletedAtNotNil,omitempty"`
+	// deleted_by field predicates
+	DeletedBy             *string  `json:"deletedBy,omitempty"`
+	DeletedByNeq          *string  `json:"deletedByNEQ,omitempty"`
+	DeletedByIn           []string `json:"deletedByIn,omitempty"`
+	DeletedByNotIn        []string `json:"deletedByNotIn,omitempty"`
+	DeletedByGt           *string  `json:"deletedByGT,omitempty"`
+	DeletedByGte          *string  `json:"deletedByGTE,omitempty"`
+	DeletedByLt           *string  `json:"deletedByLT,omitempty"`
+	DeletedByLte          *string  `json:"deletedByLTE,omitempty"`
+	DeletedByContains     *string  `json:"deletedByContains,omitempty"`
+	DeletedByHasPrefix    *string  `json:"deletedByHasPrefix,omitempty"`
+	DeletedByHasSuffix    *string  `json:"deletedByHasSuffix,omitempty"`
+	DeletedByIsNil        *bool    `json:"deletedByIsNil,omitempty"`
+	DeletedByNotNil       *bool    `json:"deletedByNotNil,omitempty"`
+	DeletedByEqualFold    *string  `json:"deletedByEqualFold,omitempty"`
+	DeletedByContainsFold *string  `json:"deletedByContainsFold,omitempty"`
 	// name field predicates
 	Name             *string  `json:"name,omitempty"`
 	NameNeq          *string  `json:"nameNEQ,omitempty"`
@@ -756,6 +821,8 @@ func (ResourceOwner) IsEntity() {}
 
 // Input information to update a load balancer.
 type UpdateLoadBalancerInput struct {
+	UpdatedBy      *string `json:"updatedBy,omitempty"`
+	ClearUpdatedBy *bool   `json:"clearUpdatedBy,omitempty"`
 	// The name of the load balancer.
 	Name          *string           `json:"name,omitempty"`
 	AddPortIDs    []gidx.PrefixedID `json:"addPortIDs,omitempty"`
