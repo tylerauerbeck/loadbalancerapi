@@ -29,6 +29,7 @@ type Port struct {
 func (Port) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		entx.NewTimestampMixin(),
+		// entx.NewAuditMixin(),
 	}
 }
 

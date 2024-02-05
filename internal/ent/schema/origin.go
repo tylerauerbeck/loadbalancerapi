@@ -26,6 +26,7 @@ type Origin struct {
 func (Origin) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		entx.NewTimestampMixin(),
+		// entx.NewAuditMixin(),
 	}
 }
 
