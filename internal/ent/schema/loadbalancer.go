@@ -14,6 +14,8 @@ import (
 
 	audit "go.infratographer.com/load-balancer-api/internal/ent/schema/audit"
 	"go.infratographer.com/load-balancer-api/x/pubsubinfo"
+
+	_ "go.infratographer.com/load-balancer-api/internal/ent/generated"
 )
 
 // LoadBalancer holds the schema definition for the LoadBalancer entity.
