@@ -17,6 +17,8 @@ import (
 	"go.infratographer.com/permissions-api/pkg/permissions"
 	"go.infratographer.com/x/events"
 	"go.infratographer.com/x/gidx"
+
+	_ "go.infratographer.com/load-balancer-api/internal/ent/generated/runtime"
 )
 
 // LoadBalancerCreate is the resolver for the loadBalancerCreate field.
