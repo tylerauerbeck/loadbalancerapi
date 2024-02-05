@@ -3228,8 +3228,6 @@ type ProviderMutation struct {
 	id                    *gidx.PrefixedID
 	created_at            *time.Time
 	updated_at            *time.Time
-	created_by            *string
-	updated_by            *string
 	name                  *string
 	owner_id              *gidx.PrefixedID
 	clearedFields         map[string]struct{}
@@ -3417,104 +3415,6 @@ func (m *ProviderMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
-// SetCreatedBy sets the "created_by" field.
-func (m *ProviderMutation) SetCreatedBy(s string) {
-	m.created_by = &s
-}
-
-// CreatedBy returns the value of the "created_by" field in the mutation.
-func (m *ProviderMutation) CreatedBy() (r string, exists bool) {
-	v := m.created_by
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedBy returns the old "created_by" field's value of the Provider entity.
-// If the Provider object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProviderMutation) OldCreatedBy(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreatedBy is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreatedBy requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedBy: %w", err)
-	}
-	return oldValue.CreatedBy, nil
-}
-
-// ClearCreatedBy clears the value of the "created_by" field.
-func (m *ProviderMutation) ClearCreatedBy() {
-	m.created_by = nil
-	m.clearedFields[provider.FieldCreatedBy] = struct{}{}
-}
-
-// CreatedByCleared returns if the "created_by" field was cleared in this mutation.
-func (m *ProviderMutation) CreatedByCleared() bool {
-	_, ok := m.clearedFields[provider.FieldCreatedBy]
-	return ok
-}
-
-// ResetCreatedBy resets all changes to the "created_by" field.
-func (m *ProviderMutation) ResetCreatedBy() {
-	m.created_by = nil
-	delete(m.clearedFields, provider.FieldCreatedBy)
-}
-
-// SetUpdatedBy sets the "updated_by" field.
-func (m *ProviderMutation) SetUpdatedBy(s string) {
-	m.updated_by = &s
-}
-
-// UpdatedBy returns the value of the "updated_by" field in the mutation.
-func (m *ProviderMutation) UpdatedBy() (r string, exists bool) {
-	v := m.updated_by
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedBy returns the old "updated_by" field's value of the Provider entity.
-// If the Provider object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProviderMutation) OldUpdatedBy(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdatedBy is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdatedBy requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedBy: %w", err)
-	}
-	return oldValue.UpdatedBy, nil
-}
-
-// ClearUpdatedBy clears the value of the "updated_by" field.
-func (m *ProviderMutation) ClearUpdatedBy() {
-	m.updated_by = nil
-	m.clearedFields[provider.FieldUpdatedBy] = struct{}{}
-}
-
-// UpdatedByCleared returns if the "updated_by" field was cleared in this mutation.
-func (m *ProviderMutation) UpdatedByCleared() bool {
-	_, ok := m.clearedFields[provider.FieldUpdatedBy]
-	return ok
-}
-
-// ResetUpdatedBy resets all changes to the "updated_by" field.
-func (m *ProviderMutation) ResetUpdatedBy() {
-	m.updated_by = nil
-	delete(m.clearedFields, provider.FieldUpdatedBy)
-}
-
 // SetName sets the "name" field.
 func (m *ProviderMutation) SetName(s string) {
 	m.name = &s
@@ -3675,18 +3575,12 @@ func (m *ProviderMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ProviderMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 4)
 	if m.created_at != nil {
 		fields = append(fields, provider.FieldCreatedAt)
 	}
 	if m.updated_at != nil {
 		fields = append(fields, provider.FieldUpdatedAt)
-	}
-	if m.created_by != nil {
-		fields = append(fields, provider.FieldCreatedBy)
-	}
-	if m.updated_by != nil {
-		fields = append(fields, provider.FieldUpdatedBy)
 	}
 	if m.name != nil {
 		fields = append(fields, provider.FieldName)
@@ -3706,10 +3600,6 @@ func (m *ProviderMutation) Field(name string) (ent.Value, bool) {
 		return m.CreatedAt()
 	case provider.FieldUpdatedAt:
 		return m.UpdatedAt()
-	case provider.FieldCreatedBy:
-		return m.CreatedBy()
-	case provider.FieldUpdatedBy:
-		return m.UpdatedBy()
 	case provider.FieldName:
 		return m.Name()
 	case provider.FieldOwnerID:
@@ -3727,10 +3617,6 @@ func (m *ProviderMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldCreatedAt(ctx)
 	case provider.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
-	case provider.FieldCreatedBy:
-		return m.OldCreatedBy(ctx)
-	case provider.FieldUpdatedBy:
-		return m.OldUpdatedBy(ctx)
 	case provider.FieldName:
 		return m.OldName(ctx)
 	case provider.FieldOwnerID:
@@ -3757,20 +3643,6 @@ func (m *ProviderMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdatedAt(v)
-		return nil
-	case provider.FieldCreatedBy:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedBy(v)
-		return nil
-	case provider.FieldUpdatedBy:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedBy(v)
 		return nil
 	case provider.FieldName:
 		v, ok := value.(string)
@@ -3815,14 +3687,7 @@ func (m *ProviderMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *ProviderMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(provider.FieldCreatedBy) {
-		fields = append(fields, provider.FieldCreatedBy)
-	}
-	if m.FieldCleared(provider.FieldUpdatedBy) {
-		fields = append(fields, provider.FieldUpdatedBy)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -3835,14 +3700,6 @@ func (m *ProviderMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *ProviderMutation) ClearField(name string) error {
-	switch name {
-	case provider.FieldCreatedBy:
-		m.ClearCreatedBy()
-		return nil
-	case provider.FieldUpdatedBy:
-		m.ClearUpdatedBy()
-		return nil
-	}
 	return fmt.Errorf("unknown Provider nullable field %s", name)
 }
 
@@ -3855,12 +3712,6 @@ func (m *ProviderMutation) ResetField(name string) error {
 		return nil
 	case provider.FieldUpdatedAt:
 		m.ResetUpdatedAt()
-		return nil
-	case provider.FieldCreatedBy:
-		m.ResetCreatedBy()
-		return nil
-	case provider.FieldUpdatedBy:
-		m.ResetUpdatedBy()
 		return nil
 	case provider.FieldName:
 		m.ResetName()

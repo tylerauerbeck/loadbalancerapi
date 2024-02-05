@@ -59,8 +59,6 @@ input CreateLoadBalancerPortInput {
 }
 """Input information to create a load balancer provider."""
 input CreateLoadBalancerProviderInput {
-	createdBy: String
-	updatedBy: String
 	"""The name of the load balancer provider."""
 	name: String!
 	"""The ID for the owner for this load balancer."""
@@ -567,8 +565,6 @@ type LoadBalancerProvider implements Node @key(fields: "id") @prefixedID(prefix:
 	id: ID!
 	createdAt: Time!
 	updatedAt: Time!
-	createdBy: String
-	updatedBy: String
 	"""The name of the load balancer provider."""
 	name: String!
 	loadBalancers(
@@ -674,38 +670,6 @@ input LoadBalancerProviderWhereInput {
 	updatedAtGTE: Time
 	updatedAtLT: Time
 	updatedAtLTE: Time
-	"""created_by field predicates"""
-	createdBy: String
-	createdByNEQ: String
-	createdByIn: [String!]
-	createdByNotIn: [String!]
-	createdByGT: String
-	createdByGTE: String
-	createdByLT: String
-	createdByLTE: String
-	createdByContains: String
-	createdByHasPrefix: String
-	createdByHasSuffix: String
-	createdByIsNil: Boolean
-	createdByNotNil: Boolean
-	createdByEqualFold: String
-	createdByContainsFold: String
-	"""updated_by field predicates"""
-	updatedBy: String
-	updatedByNEQ: String
-	updatedByIn: [String!]
-	updatedByNotIn: [String!]
-	updatedByGT: String
-	updatedByGTE: String
-	updatedByLT: String
-	updatedByLTE: String
-	updatedByContains: String
-	updatedByHasPrefix: String
-	updatedByHasSuffix: String
-	updatedByIsNil: Boolean
-	updatedByNotNil: Boolean
-	updatedByEqualFold: String
-	updatedByContainsFold: String
 	"""name field predicates"""
 	name: String
 	nameNEQ: String
@@ -1051,8 +1015,6 @@ input UpdateLoadBalancerPortInput {
 }
 """Input information to update a load balancer provider."""
 input UpdateLoadBalancerProviderInput {
-	updatedBy: String
-	clearUpdatedBy: Boolean
 	"""The name of the load balancer provider."""
 	name: String
 }

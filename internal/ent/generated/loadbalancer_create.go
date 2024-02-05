@@ -158,9 +158,7 @@ func (lbc *LoadBalancerCreate) Mutation() *LoadBalancerMutation {
 
 // Save creates the LoadBalancer in the database.
 func (lbc *LoadBalancerCreate) Save(ctx context.Context) (*LoadBalancer, error) {
-	if err := lbc.defaults(); err != nil {
-		return nil, err
-	}
+	lbc.defaults()
 	return withHooks(ctx, lbc.sqlSave, lbc.mutation, lbc.hooks)
 }
 
@@ -187,29 +185,19 @@ func (lbc *LoadBalancerCreate) ExecX(ctx context.Context) {
 }
 
 // defaults sets the default values of the builder before save.
-func (lbc *LoadBalancerCreate) defaults() error {
+func (lbc *LoadBalancerCreate) defaults() {
 	if _, ok := lbc.mutation.CreatedAt(); !ok {
-		if loadbalancer.DefaultCreatedAt == nil {
-			return fmt.Errorf("generated: uninitialized loadbalancer.DefaultCreatedAt (forgotten import generated/runtime?)")
-		}
 		v := loadbalancer.DefaultCreatedAt()
 		lbc.mutation.SetCreatedAt(v)
 	}
 	if _, ok := lbc.mutation.UpdatedAt(); !ok {
-		if loadbalancer.DefaultUpdatedAt == nil {
-			return fmt.Errorf("generated: uninitialized loadbalancer.DefaultUpdatedAt (forgotten import generated/runtime?)")
-		}
 		v := loadbalancer.DefaultUpdatedAt()
 		lbc.mutation.SetUpdatedAt(v)
 	}
 	if _, ok := lbc.mutation.ID(); !ok {
-		if loadbalancer.DefaultID == nil {
-			return fmt.Errorf("generated: uninitialized loadbalancer.DefaultID (forgotten import generated/runtime?)")
-		}
 		v := loadbalancer.DefaultID()
 		lbc.mutation.SetID(v)
 	}
-	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.

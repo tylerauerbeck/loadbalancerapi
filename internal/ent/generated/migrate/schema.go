@@ -210,8 +210,6 @@ var (
 		{Name: "id", Type: field.TypeString, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "created_by", Type: field.TypeString, Nullable: true},
-		{Name: "updated_by", Type: field.TypeString, Nullable: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "owner_id", Type: field.TypeString},
 	}
@@ -232,19 +230,9 @@ var (
 				Columns: []*schema.Column{ProvidersColumns[2]},
 			},
 			{
-				Name:    "provider_created_by",
-				Unique:  false,
-				Columns: []*schema.Column{ProvidersColumns[3]},
-			},
-			{
-				Name:    "provider_updated_by",
-				Unique:  false,
-				Columns: []*schema.Column{ProvidersColumns[4]},
-			},
-			{
 				Name:    "provider_owner_id",
 				Unique:  false,
-				Columns: []*schema.Column{ProvidersColumns[6]},
+				Columns: []*schema.Column{ProvidersColumns[4]},
 			},
 		},
 	}

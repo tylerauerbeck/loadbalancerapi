@@ -315,20 +315,12 @@ func (c *PortUpdateOne) SetInput(i UpdateLoadBalancerPortInput) *PortUpdateOne {
 
 // CreateLoadBalancerProviderInput represents a mutation input for creating loadbalancerproviders.
 type CreateLoadBalancerProviderInput struct {
-	CreatedBy *string
-	UpdatedBy *string
-	Name      string
-	OwnerID   gidx.PrefixedID
+	Name    string
+	OwnerID gidx.PrefixedID
 }
 
 // Mutate applies the CreateLoadBalancerProviderInput on the ProviderMutation builder.
 func (i *CreateLoadBalancerProviderInput) Mutate(m *ProviderMutation) {
-	if v := i.CreatedBy; v != nil {
-		m.SetCreatedBy(*v)
-	}
-	if v := i.UpdatedBy; v != nil {
-		m.SetUpdatedBy(*v)
-	}
 	m.SetName(i.Name)
 	m.SetOwnerID(i.OwnerID)
 }
@@ -341,19 +333,11 @@ func (c *ProviderCreate) SetInput(i CreateLoadBalancerProviderInput) *ProviderCr
 
 // UpdateLoadBalancerProviderInput represents a mutation input for updating loadbalancerproviders.
 type UpdateLoadBalancerProviderInput struct {
-	ClearUpdatedBy bool
-	UpdatedBy      *string
-	Name           *string
+	Name *string
 }
 
 // Mutate applies the UpdateLoadBalancerProviderInput on the ProviderMutation builder.
 func (i *UpdateLoadBalancerProviderInput) Mutate(m *ProviderMutation) {
-	if i.ClearUpdatedBy {
-		m.ClearUpdatedBy()
-	}
-	if v := i.UpdatedBy; v != nil {
-		m.SetUpdatedBy(*v)
-	}
 	if v := i.Name; v != nil {
 		m.SetName(*v)
 	}

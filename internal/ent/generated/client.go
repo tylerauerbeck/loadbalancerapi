@@ -398,8 +398,7 @@ func (c *LoadBalancerClient) QueryProvider(lb *LoadBalancer) *ProviderQuery {
 
 // Hooks returns the client hooks.
 func (c *LoadBalancerClient) Hooks() []Hook {
-	hooks := c.hooks.LoadBalancer
-	return append(hooks[:len(hooks):len(hooks)], loadbalancer.Hooks[:]...)
+	return c.hooks.LoadBalancer
 }
 
 // Interceptors returns the client interceptors.
@@ -1027,8 +1026,7 @@ func (c *ProviderClient) QueryLoadBalancers(pr *Provider) *LoadBalancerQuery {
 
 // Hooks returns the client hooks.
 func (c *ProviderClient) Hooks() []Hook {
-	hooks := c.hooks.Provider
-	return append(hooks[:len(hooks):len(hooks)], provider.Hooks[:]...)
+	return c.hooks.Provider
 }
 
 // Interceptors returns the client interceptors.

@@ -832,16 +832,6 @@ func (pr *ProviderQuery) collectField(ctx context.Context, opCtx *graphql.Operat
 				selectedFields = append(selectedFields, provider.FieldUpdatedAt)
 				fieldSeen[provider.FieldUpdatedAt] = struct{}{}
 			}
-		case "createdBy":
-			if _, ok := fieldSeen[provider.FieldCreatedBy]; !ok {
-				selectedFields = append(selectedFields, provider.FieldCreatedBy)
-				fieldSeen[provider.FieldCreatedBy] = struct{}{}
-			}
-		case "updatedBy":
-			if _, ok := fieldSeen[provider.FieldUpdatedBy]; !ok {
-				selectedFields = append(selectedFields, provider.FieldUpdatedBy)
-				fieldSeen[provider.FieldUpdatedBy] = struct{}{}
-			}
 		case "name":
 			if _, ok := fieldSeen[provider.FieldName]; !ok {
 				selectedFields = append(selectedFields, provider.FieldName)

@@ -22,7 +22,7 @@ type Provider struct {
 func (Provider) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		entx.NewTimestampMixin(),
-		entx.NewAuditMixin(),
+		// entx.NewAuditMixin(),
 	}
 }
 
