@@ -3,6 +3,7 @@ package audit
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"entgo.io/ent"
@@ -56,20 +57,23 @@ func AuditHook(next ent.Mutator) ent.Mutator {
 	return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
 		ml, ok := m.(AuditLogger)
 		if !ok {
+			fmt.Println("YEEP")
 			return nil, errors.New("unexpected mutation type")
 		}
-
+		fmt.Println("unknown")
 		actor := "unknown-actor"
 		id, ok := ctx.Value(echojwtx.ActorCtxKey).(string)
 		if ok {
 			actor = id
 		}
+		fmt.Println("afteractor")
 
 		switch op := m.Op(); {
 		case op.Is(ent.OpCreate):
 			ml.SetCreatedAt(time.Now())
 			ml.SetCreatedBy(actor)
 			ml.SetUpdatedBy(actor)
+			fmt.Println("chacha")
 
 		case op.Is(ent.OpUpdateOne | ent.OpUpdate):
 			ml.SetUpdatedAt(time.Now())
