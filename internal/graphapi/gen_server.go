@@ -1509,6 +1509,8 @@ var sources = []*ast.Source{
 directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
 """Input information to create a load balancer."""
 input CreateLoadBalancerInput {
+  createdAt: Time
+  updatedAt: Time
   createdBy: String
   updatedBy: String
   """The name of the load balancer."""
@@ -1624,8 +1626,6 @@ input LoadBalancerOrder {
 """Properties by which LoadBalancer connections can be ordered."""
 enum LoadBalancerOrderField {
   ID
-  CREATED_AT
-  UPDATED_AT
   NAME
   OWNER
 }
@@ -2244,6 +2244,7 @@ type Query {
 scalar Time
 """Input information to update a load balancer."""
 input UpdateLoadBalancerInput {
+  updatedAt: Time
   updatedBy: String
   clearUpdatedBy: Boolean
   """The name of the load balancer."""
@@ -12189,13 +12190,31 @@ func (ec *executionContext) unmarshalInputCreateLoadBalancerInput(ctx context.Co
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"createdBy", "updatedBy", "name", "ownerID", "locationID", "portIDs", "providerID"}
+	fieldsInOrder := [...]string{"createdAt", "updatedAt", "createdBy", "updatedBy", "name", "ownerID", "locationID", "portIDs", "providerID"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
+		case "createdAt":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("createdAt"))
+			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CreatedAt = data
+		case "updatedAt":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("updatedAt"))
+			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.UpdatedAt = data
 		case "createdBy":
 			var err error
 
@@ -15416,13 +15435,22 @@ func (ec *executionContext) unmarshalInputUpdateLoadBalancerInput(ctx context.Co
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"updatedBy", "clearUpdatedBy", "name", "addPortIDs", "removePortIDs", "clearPorts"}
+	fieldsInOrder := [...]string{"updatedAt", "updatedBy", "clearUpdatedBy", "name", "addPortIDs", "removePortIDs", "clearPorts"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
+		case "updatedAt":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("updatedAt"))
+			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.UpdatedAt = data
 		case "updatedBy":
 			var err error
 

@@ -1,6 +1,8 @@
 directive @prefixedID(prefix: String!) on OBJECT
 """Input information to create a load balancer."""
 input CreateLoadBalancerInput {
+	createdAt: Time
+	updatedAt: Time
 	createdBy: String
 	updatedBy: String
 	"""The name of the load balancer."""
@@ -133,8 +135,6 @@ input LoadBalancerOrder {
 """Properties by which LoadBalancer connections can be ordered."""
 enum LoadBalancerOrderField {
 	ID
-	CREATED_AT
-	UPDATED_AT
 	NAME
 	OWNER
 }
@@ -956,6 +956,7 @@ type ResourceOwner @interfaceObject @key(fields: "id") {
 scalar Time
 """Input information to update a load balancer."""
 input UpdateLoadBalancerInput {
+	updatedAt: Time
 	updatedBy: String
 	clearUpdatedBy: Boolean
 	"""The name of the load balancer."""

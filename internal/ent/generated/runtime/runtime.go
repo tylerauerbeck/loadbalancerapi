@@ -33,8 +33,8 @@ import (
 // to their package variables.
 func init() {
 	loadbalancerMixin := schema.LoadBalancer{}.Mixin()
-	loadbalancerMixinHooks1 := loadbalancerMixin[1].Hooks()
-	loadbalancer.Hooks[0] = loadbalancerMixinHooks1[0]
+	loadbalancerMixinHooks0 := loadbalancerMixin[0].Hooks()
+	loadbalancer.Hooks[0] = loadbalancerMixinHooks0[0]
 	loadbalancerMixinFields0 := loadbalancerMixin[0].Fields()
 	_ = loadbalancerMixinFields0
 	loadbalancerFields := schema.LoadBalancer{}.Fields()

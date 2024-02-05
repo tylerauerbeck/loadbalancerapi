@@ -17,12 +17,16 @@
 package generated
 
 import (
+	"time"
+
 	"go.infratographer.com/load-balancer-api/internal/ent/generated/pool"
 	"go.infratographer.com/x/gidx"
 )
 
 // CreateLoadBalancerInput represents a mutation input for creating loadbalancers.
 type CreateLoadBalancerInput struct {
+	CreatedAt  *time.Time
+	UpdatedAt  *time.Time
 	CreatedBy  *string
 	UpdatedBy  *string
 	Name       string
@@ -34,6 +38,12 @@ type CreateLoadBalancerInput struct {
 
 // Mutate applies the CreateLoadBalancerInput on the LoadBalancerMutation builder.
 func (i *CreateLoadBalancerInput) Mutate(m *LoadBalancerMutation) {
+	if v := i.CreatedAt; v != nil {
+		m.SetCreatedAt(*v)
+	}
+	if v := i.UpdatedAt; v != nil {
+		m.SetUpdatedAt(*v)
+	}
 	if v := i.CreatedBy; v != nil {
 		m.SetCreatedBy(*v)
 	}
@@ -57,6 +67,7 @@ func (c *LoadBalancerCreate) SetInput(i CreateLoadBalancerInput) *LoadBalancerCr
 
 // UpdateLoadBalancerInput represents a mutation input for updating loadbalancers.
 type UpdateLoadBalancerInput struct {
+	UpdatedAt      *time.Time
 	ClearUpdatedBy bool
 	UpdatedBy      *string
 	Name           *string
@@ -67,6 +78,9 @@ type UpdateLoadBalancerInput struct {
 
 // Mutate applies the UpdateLoadBalancerInput on the LoadBalancerMutation builder.
 func (i *UpdateLoadBalancerInput) Mutate(m *LoadBalancerMutation) {
+	if v := i.UpdatedAt; v != nil {
+		m.SetUpdatedAt(*v)
+	}
 	if i.ClearUpdatedBy {
 		m.ClearUpdatedBy()
 	}

@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -40,6 +41,12 @@ type LoadBalancerUpdate struct {
 // Where appends a list predicates to the LoadBalancerUpdate builder.
 func (lbu *LoadBalancerUpdate) Where(ps ...predicate.LoadBalancer) *LoadBalancerUpdate {
 	lbu.mutation.Where(ps...)
+	return lbu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (lbu *LoadBalancerUpdate) SetUpdatedAt(t time.Time) *LoadBalancerUpdate {
+	lbu.mutation.SetUpdatedAt(t)
 	return lbu
 }
 
@@ -255,6 +262,12 @@ type LoadBalancerUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *LoadBalancerMutation
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (lbuo *LoadBalancerUpdateOne) SetUpdatedAt(t time.Time) *LoadBalancerUpdateOne {
+	lbuo.mutation.SetUpdatedAt(t)
+	return lbuo
 }
 
 // SetUpdatedBy sets the "updated_by" field.

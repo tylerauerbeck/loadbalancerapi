@@ -337,34 +337,6 @@ var (
 			}
 		},
 	}
-	// LoadBalancerOrderFieldCreatedAt orders LoadBalancer by created_at.
-	LoadBalancerOrderFieldCreatedAt = &LoadBalancerOrderField{
-		Value: func(lb *LoadBalancer) (ent.Value, error) {
-			return lb.CreatedAt, nil
-		},
-		column: loadbalancer.FieldCreatedAt,
-		toTerm: loadbalancer.ByCreatedAt,
-		toCursor: func(lb *LoadBalancer) Cursor {
-			return Cursor{
-				ID:    lb.ID,
-				Value: lb.CreatedAt,
-			}
-		},
-	}
-	// LoadBalancerOrderFieldUpdatedAt orders LoadBalancer by updated_at.
-	LoadBalancerOrderFieldUpdatedAt = &LoadBalancerOrderField{
-		Value: func(lb *LoadBalancer) (ent.Value, error) {
-			return lb.UpdatedAt, nil
-		},
-		column: loadbalancer.FieldUpdatedAt,
-		toTerm: loadbalancer.ByUpdatedAt,
-		toCursor: func(lb *LoadBalancer) Cursor {
-			return Cursor{
-				ID:    lb.ID,
-				Value: lb.UpdatedAt,
-			}
-		},
-	}
 	// LoadBalancerOrderFieldName orders LoadBalancer by name.
 	LoadBalancerOrderFieldName = &LoadBalancerOrderField{
 		Value: func(lb *LoadBalancer) (ent.Value, error) {
@@ -401,10 +373,6 @@ func (f LoadBalancerOrderField) String() string {
 	switch f.column {
 	case LoadBalancerOrderFieldID.column:
 		str = "ID"
-	case LoadBalancerOrderFieldCreatedAt.column:
-		str = "CREATED_AT"
-	case LoadBalancerOrderFieldUpdatedAt.column:
-		str = "UPDATED_AT"
 	case LoadBalancerOrderFieldName.column:
 		str = "NAME"
 	case LoadBalancerOrderFieldOwnerID.column:
@@ -427,10 +395,6 @@ func (f *LoadBalancerOrderField) UnmarshalGQL(v interface{}) error {
 	switch str {
 	case "ID":
 		*f = *LoadBalancerOrderFieldID
-	case "CREATED_AT":
-		*f = *LoadBalancerOrderFieldCreatedAt
-	case "UPDATED_AT":
-		*f = *LoadBalancerOrderFieldUpdatedAt
 	case "NAME":
 		*f = *LoadBalancerOrderFieldName
 	case "OWNER":

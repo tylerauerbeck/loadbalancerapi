@@ -49,26 +49,6 @@ var (
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "loadbalancer_created_at",
-				Unique:  false,
-				Columns: []*schema.Column{LoadBalancersColumns[1]},
-			},
-			{
-				Name:    "loadbalancer_updated_at",
-				Unique:  false,
-				Columns: []*schema.Column{LoadBalancersColumns[2]},
-			},
-			{
-				Name:    "loadbalancer_created_by",
-				Unique:  false,
-				Columns: []*schema.Column{LoadBalancersColumns[3]},
-			},
-			{
-				Name:    "loadbalancer_updated_by",
-				Unique:  false,
-				Columns: []*schema.Column{LoadBalancersColumns[4]},
-			},
-			{
 				Name:    "loadbalancer_provider_id",
 				Unique:  false,
 				Columns: []*schema.Column{LoadBalancersColumns[8]},

@@ -35,8 +35,10 @@ type Entity interface {
 
 // Input information to create a load balancer.
 type CreateLoadBalancerInput struct {
-	CreatedBy *string `json:"createdBy,omitempty"`
-	UpdatedBy *string `json:"updatedBy,omitempty"`
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+	CreatedBy *string    `json:"createdBy,omitempty"`
+	UpdatedBy *string    `json:"updatedBy,omitempty"`
 	// The name of the load balancer.
 	Name string `json:"name"`
 	// The ID for the owner for this load balancer.
@@ -792,8 +794,9 @@ func (ResourceOwner) IsEntity() {}
 
 // Input information to update a load balancer.
 type UpdateLoadBalancerInput struct {
-	UpdatedBy      *string `json:"updatedBy,omitempty"`
-	ClearUpdatedBy *bool   `json:"clearUpdatedBy,omitempty"`
+	UpdatedAt      *time.Time `json:"updatedAt,omitempty"`
+	UpdatedBy      *string    `json:"updatedBy,omitempty"`
+	ClearUpdatedBy *bool      `json:"clearUpdatedBy,omitempty"`
 	// The name of the load balancer.
 	Name          *string           `json:"name,omitempty"`
 	AddPortIDs    []gidx.PrefixedID `json:"addPortIDs,omitempty"`
@@ -848,24 +851,20 @@ type Service struct {
 type LoadBalancerOrderField string
 
 const (
-	LoadBalancerOrderFieldID        LoadBalancerOrderField = "ID"
-	LoadBalancerOrderFieldCreatedAt LoadBalancerOrderField = "CREATED_AT"
-	LoadBalancerOrderFieldUpdatedAt LoadBalancerOrderField = "UPDATED_AT"
-	LoadBalancerOrderFieldName      LoadBalancerOrderField = "NAME"
-	LoadBalancerOrderFieldOwner     LoadBalancerOrderField = "OWNER"
+	LoadBalancerOrderFieldID    LoadBalancerOrderField = "ID"
+	LoadBalancerOrderFieldName  LoadBalancerOrderField = "NAME"
+	LoadBalancerOrderFieldOwner LoadBalancerOrderField = "OWNER"
 )
 
 var AllLoadBalancerOrderField = []LoadBalancerOrderField{
 	LoadBalancerOrderFieldID,
-	LoadBalancerOrderFieldCreatedAt,
-	LoadBalancerOrderFieldUpdatedAt,
 	LoadBalancerOrderFieldName,
 	LoadBalancerOrderFieldOwner,
 }
 
 func (e LoadBalancerOrderField) IsValid() bool {
 	switch e {
-	case LoadBalancerOrderFieldID, LoadBalancerOrderFieldCreatedAt, LoadBalancerOrderFieldUpdatedAt, LoadBalancerOrderFieldName, LoadBalancerOrderFieldOwner:
+	case LoadBalancerOrderFieldID, LoadBalancerOrderFieldName, LoadBalancerOrderFieldOwner:
 		return true
 	}
 	return false
