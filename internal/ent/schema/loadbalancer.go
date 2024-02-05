@@ -30,7 +30,7 @@ func (LoadBalancer) Mixin() []ent.Mixin {
 		// entx.NewTimestampMixin(),
 		timestamp.NewTimestampMixin(),
 		// entx.NewAuditMixin(),
-		audit.NewAuditMixin(),
+		audit.AuditMixin{},
 		// softdelete.Mixin{},
 	}
 }
