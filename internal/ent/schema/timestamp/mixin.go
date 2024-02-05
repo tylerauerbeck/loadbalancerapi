@@ -23,6 +23,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"entgo.io/ent/schema/mixin"
+
+	_ "go.infratographer.com/load-balancer-api/internal/ent/generated"
 )
 
 // TimestampsMixin defines an interface of a Mixin that provides the created_at and updated_at timestamp fields
