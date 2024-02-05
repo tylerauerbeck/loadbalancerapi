@@ -24,6 +24,8 @@ import (
 	"entgo.io/ent/schema/index"
 	"entgo.io/ent/schema/mixin"
 	"go.infratographer.com/x/echojwtx"
+
+	_ "go.infratographer.com/load-balancer-api/internal/ent/generated"
 )
 
 // AuditMixin defines an interface of a Mixin that provides the created_at and updated_at timestamp fields
