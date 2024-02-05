@@ -27,6 +27,8 @@ var (
 		{Name: "id", Type: field.TypeString, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "created_by", Type: field.TypeString, Nullable: true},
+		{Name: "updated_by", Type: field.TypeString, Nullable: true},
 		{Name: "name", Type: field.TypeString, Size: 2147483647},
 		{Name: "owner_id", Type: field.TypeString},
 		{Name: "location_id", Type: field.TypeString},
@@ -40,7 +42,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "load_balancers_providers_provider",
-				Columns:    []*schema.Column{LoadBalancersColumns[6]},
+				Columns:    []*schema.Column{LoadBalancersColumns[8]},
 				RefColumns: []*schema.Column{ProvidersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -57,19 +59,29 @@ var (
 				Columns: []*schema.Column{LoadBalancersColumns[2]},
 			},
 			{
+				Name:    "loadbalancer_created_by",
+				Unique:  false,
+				Columns: []*schema.Column{LoadBalancersColumns[3]},
+			},
+			{
+				Name:    "loadbalancer_updated_by",
+				Unique:  false,
+				Columns: []*schema.Column{LoadBalancersColumns[4]},
+			},
+			{
 				Name:    "loadbalancer_provider_id",
 				Unique:  false,
-				Columns: []*schema.Column{LoadBalancersColumns[6]},
+				Columns: []*schema.Column{LoadBalancersColumns[8]},
 			},
 			{
 				Name:    "loadbalancer_location_id",
 				Unique:  false,
-				Columns: []*schema.Column{LoadBalancersColumns[5]},
+				Columns: []*schema.Column{LoadBalancersColumns[7]},
 			},
 			{
 				Name:    "loadbalancer_owner_id",
 				Unique:  false,
-				Columns: []*schema.Column{LoadBalancersColumns[4]},
+				Columns: []*schema.Column{LoadBalancersColumns[6]},
 			},
 		},
 	}
@@ -198,6 +210,8 @@ var (
 		{Name: "id", Type: field.TypeString, Unique: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "created_by", Type: field.TypeString, Nullable: true},
+		{Name: "updated_by", Type: field.TypeString, Nullable: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "owner_id", Type: field.TypeString},
 	}
@@ -218,9 +232,19 @@ var (
 				Columns: []*schema.Column{ProvidersColumns[2]},
 			},
 			{
-				Name:    "provider_owner_id",
+				Name:    "provider_created_by",
+				Unique:  false,
+				Columns: []*schema.Column{ProvidersColumns[3]},
+			},
+			{
+				Name:    "provider_updated_by",
 				Unique:  false,
 				Columns: []*schema.Column{ProvidersColumns[4]},
+			},
+			{
+				Name:    "provider_owner_id",
+				Unique:  false,
+				Columns: []*schema.Column{ProvidersColumns[6]},
 			},
 		},
 	}
